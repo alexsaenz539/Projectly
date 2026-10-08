@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500" fill="none">
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#E2E8F0" stroke-width="0.8"/>
+    </pattern>
+    <pattern id="grid-major" width="100" height="100" patternUnits="userSpaceOnUse">
+      <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#CBD5E1" stroke-width="1.2"/>
+    </pattern>
+  </defs>
+  <!-- Fondo y Cuadrícula -->
+  <rect width="500" height="500" fill="#FFFFFF"/>
+  <rect width="500" height="500" fill="url(#grid)"/>
+  <rect width="500" height="500" fill="url(#grid-major)"/>
+
+  <!-- Bounding box del isotipo (300x300 centrado de 100 a 400) -->
+  <rect x="100" y="100" width="300" height="300" rx="4" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 4"/>
+  
+  <!-- Eje Diagonal de 45 Grados -->
+  <line x1="50" y1="450" x2="450" y2="50" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <line x1="50" y1="50" x2="450" y2="450" stroke="#94A3B8" stroke-width="1" stroke-dasharray="2 4"/>
+
+  <!-- Círculos de Construcción Geométrica -->
+  <!-- Círculo Superior Derecho (Centro x=330, y=170, R=80) -->
+  <circle cx="330" cy="170" r="80" stroke="#3B82F6" stroke-width="1.2" stroke-dasharray="5 5" fill="none"/>
+  <!-- Círculo Inferior Izquierdo (Centro x=170, y=330, R=80) -->
+  <circle cx="170" cy="330" r="80" stroke="#10B981" stroke-width="1.2" stroke-dasharray="5 5" fill="none"/>
+  
+  <!-- Círculos de redondeo de esquinas (R=42) -->
+  <circle cx="280" cy="220" r="42" stroke="#6366F1" stroke-width="0.8" stroke-dasharray="3 3" fill="none"/>
+  <circle cx="220" cy="280" r="42" stroke="#6366F1" stroke-width="0.8" stroke-dasharray="3 3" fill="none"/>
+
+  <!-- Líneas Tangentes y Canal Diagonal -->
+  <line x1="120" y1="230" x2="270" y2="380" stroke="#10B981" stroke-width="1.2" stroke-dasharray="4 2"/>
+  <line x1="230" y1="120" x2="380" y2="270" stroke="#111827" stroke-width="1.2" stroke-dasharray="4 2"/>
+
+  <!-- Formas del Logotipo Reales Semitransparentes -->
+  <g transform="translate(100, 100) scale(3)">
+    <path d="M 55 17 L 69 17 A 14 14 0 0 1 83 31 L 83 45 A 14 14 0 0 1 69 59 L 64 59 A 6 6 0 0 1 59.8 57.2 L 44.8 42.2 A 6 6 0 0 1 41 38 L 41 31 A 14 14 0 0 1 55 17 Z" fill="#111827" fill-opacity="0.85"/>
+    <path d="M 45 83 L 31 83 A 14 14 0 0 1 17 69 L 17 55 A 14 14 0 0 1 31 41 L 36 41 A 6 6 0 0 1 40.2 42.8 L 55.2 57.8 A 6 6 0 0 1 59 62 L 59 69 A 14 14 0 0 1 45 83 Z" fill="#10B981" fill-opacity="0.85"/>
+  </g>
+
+  <!-- Puntos Clave de Tangencia -->
+  <circle cx="250" cy="250" r="4" fill="#EF4444"/>
+  <circle cx="170" cy="330" r="3" fill="#10B981"/>
+  <circle cx="330" cy="170" r="3" fill="#111827"/>
+  
+  <!-- Anotaciones y Cotas Técnicas -->
+  <text x="255" y="245" font-family="'Inter', sans-serif" font-size="11" font-weight="600" fill="#EF4444">Centro (0,0)</text>
+  <text x="335" y="165" font-family="'Inter', sans-serif" font-size="11" font-weight="600" fill="#111827">Nodo Alfa (+45°)</text>
+  <text x="70" y="340" font-family="'Inter', sans-serif" font-size="11" font-weight="600" fill="#10B981">Nodo Beta (-45°)</text>
+  <text x="370" y="70" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#F59E0B">Eje 45° Dinámico</text>
+  <text x="20" y="480" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="#64748B">Projectly · Geometría y Grilla Modular de Construcción</text>
+</svg>

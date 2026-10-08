@@ -1,0 +1,172 @@
+/* Product UI mapped to the official Projectly tokens. */
+.dark .topbar,
+.dark .auth-card {
+  background: #111827;
+}
+.btn,
+.icon-btn,
+.search-launch,
+.field,
+.select,
+.nav-link,
+.form-row input,
+.form-row select,
+.form-row textarea {
+  border-radius: var(--radius-control);
+}
+.btn {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.nav-link {
+  font-size: 14px;
+}
+.nav-heading,
+.eyebrow {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.page-title {
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.167;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.page-subtitle {
+  font-size: 16px;
+  line-height: 24px;
+}
+.card-title,
+.project-card h2 {
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.card-subtitle,
+.helper,
+.sidebar-footer p {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.field,
+.select,
+.form-row input,
+.form-row select,
+.form-row textarea {
+  font-size: 14px;
+}
+.form-row label {
+  font-size: 12px;
+}
+.data-table th {
+  font-size: 12px;
+}
+.data-table td,
+.list-row strong,
+.list-row .text-link {
+  font-size: 14px;
+}
+.data-table td:last-child {
+  white-space: nowrap;
+}
+.metric-label,
+.metric-note {
+  font-size: 12px;
+}
+.metric-value {
+  font-size: 40px;
+}
+.grid {
+  gap: 16px;
+}
+.card,
+.dialog,
+.desktop-update-banner,
+.kanban-col {
+  border-radius: var(--radius-card);
+}
+.project-card p {
+  font-size: 14px;
+  line-height: 22px;
+}
+.progress-fill,
+.progress-fill.accent {
+  background: var(--accent-green);
+}
+.badge {
+  gap: 6px;
+  font-size: 12px;
+}
+.badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--badge-dot, #64748b);
+  flex: none;
+}
+.badge.pending,
+.badge.medium,
+.badge.low {
+  color: var(--status-neutral-text);
+  --badge-dot: #64748b;
+}
+.badge.progress,
+.badge.review,
+.badge.high {
+  color: var(--status-warning-text);
+  --badge-dot: var(--accent-orange);
+}
+.badge.blocked,
+.badge.urgent {
+  color: var(--status-danger-text);
+  --badge-dot: #ef4444;
+}
+.badge.done {
+  color: var(--status-success-text);
+  --badge-dot: var(--accent-green);
+}
+.notification-dot {
+  background: var(--accent-orange);
+}
+.notice-unread {
+  border-left-color: var(--accent-green);
+}
+.desktop-update-copy strong {
+  font-size: 14px;
+}
+.desktop-update-copy p {
+  font-size: 12px;
+}
+progress {
+  accent-color: var(--accent-green);
+}
+.auth-card {
+  width: min(100%, 500px);
+}
+@media (max-width: 850px) {
+  .workspace {
+    display: none;
+  }
+}
+@media (max-width: 620px) {
+  .page-title {
+    font-size: 32px;
+  }
+  .card-title,
+  .project-card h2 {
+    font-size: 24px;
+    line-height: 32px;
+  }
+  .list-row {
+    flex-wrap: wrap;
+  }
+  .page-subtitle {
+    font-size: 14px;
+    line-height: 22px;
+  }
+}

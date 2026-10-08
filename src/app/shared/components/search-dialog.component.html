@@ -1,0 +1,40 @@
+<section class="dialog">
+  <div class="dialog-head">
+    <h2>Buscar en el espacio</h2>
+    <button class="icon-btn" aria-label="Cerrar" (click)="ref.close()">
+      <app-icon name="x" />
+    </button>
+  </div>
+  <div class="form-row">
+    <label for="global-search">Proyecto o ticket</label
+    ><input
+      appAutofocus
+      id="global-search"
+      type="search"
+      placeholder="Escribe un nombre, título o ID"
+      [ngModel]="query()"
+      (ngModelChange)="query.set($event)"
+    />
+  </div>
+  <div class="list-simple mt-4" aria-live="polite">
+    @if (query().trim()) {
+      @for (p of projects(); track p.id) {
+        <button class="list-row search-result" (click)="openProject(p.id)">
+          <span class="mono">{{ p.key }}</span
+          ><strong>{{ p.name }}</strong>
+        </button>
+      }
+      @for (t of tickets(); track t.id) {
+        <button class="list-row search-result" (click)="openTicket(t)">
+          <span class="mono">{{ t.key }}</span
+          ><strong>{{ t.title }}</strong>
+        </button>
+      }
+      @if (!projects().length && !tickets().length) {
+        <p class="helper">Sin resultados.</p>
+      }
+    } @else {
+      <p class="helper">Empieza a escribir para ver resultados.</p>
+    }
+  </div>
+</section>

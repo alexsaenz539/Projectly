@@ -1,0 +1,51 @@
+<app-page-header
+  title="Notificaciones"
+  eyebrow="Actividad"
+  subtitle="Actividad del espacio y tickets que requieren atención."
+/>
+<section class="card card-pad mb-4">
+  <h2 class="card-title mb-4">Requieren atención</h2>
+  <div class="list-simple">
+    @for (t of urgent(); track t.id) {
+      <article class="list-row">
+        <div>
+          <strong>{{ t.title }}</strong>
+          <p>
+            {{ t.key }} · {{ t.status }} ·
+            {{ t.due ? (t.due + 'T12:00:00' | date: 'dd MMM yyyy') : 'Sin fecha' }}
+          </p>
+        </div>
+        <span class="spacer"></span
+        ><button class="btn" (click)="editor.open('ticket', t)">Abrir</button>
+      </article>
+    } @empty {
+      <p class="helper">No hay tickets bloqueados ni atrasados.</p>
+    }
+  </div>
+</section>
+<section class="card card-pad">
+  <h2 class="card-title mb-4">Actividad reciente</h2>
+  <div class="list-simple">
+    @for (n of recent(); track n.id) {
+      <article class="list-row" [class.notice-unread]="!n.read">
+        <div>
+          <strong>{{ n.title }}</strong>
+          <p>{{ n.body }}</p>
+          <span class="helper">{{ n.created_at | date: 'dd MMM, HH:mm' }}</span>
+        </div>
+        <span class="spacer"></span>
+        @if (!n.read) {
+          <button
+            class="btn btn-quiet"
+            [disabled]="store.busy()"
+            (click)="store.save('notifications', { ...n, read: true })"
+          >
+            Marcar leída
+          </button>
+        }
+      </article>
+    } @empty {
+      <p class="helper">Todavía no hay actividad.</p>
+    }
+  </div>
+</section>

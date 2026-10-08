@@ -1,0 +1,30 @@
+<app-page-header
+  title="Equipo"
+  eyebrow="Administración"
+  subtitle="Un directorio de responsables para organizar el trabajo."
+  ><button class="btn btn-primary" (click)="editor.open('member')">
+    <app-icon name="plus" />Añadir miembro
+  </button></app-page-header
+>
+<section class="card card-pad">
+  <div class="list-simple">
+    @for (m of store.members(); track m.id) {
+      <article class="list-row">
+        <div class="avatar">{{ m.name | initials }}</div>
+        <div>
+          <strong>{{ m.name }}</strong>
+          <p>{{ m.email }} · {{ m.role }}</p>
+        </div>
+        <span class="spacer"></span><span class="helper">{{ assigned(m.id) }} tickets</span
+        ><button class="btn btn-quiet" (click)="editor.open('member', m)">Editar</button>
+      </article>
+    } @empty {
+      <div class="empty">
+        <strong>Aún no hay miembros</strong>Añade los responsables de tus proyectos.
+      </div>
+    }
+  </div>
+</section>
+<p class="helper mt-4">
+  El directorio no envía invitaciones ni comparte tu espacio. Los roles son etiquetas organizativas.
+</p>

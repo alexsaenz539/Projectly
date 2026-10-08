@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <rect width="64" height="64" rx="16" fill="#F8FAFC"/>
+  <!-- Rayo Moderno -->
+  <path d="M34 14 L20 34 L32 34 L30 50 L44 30 L32 30 Z" fill="#111827"/>
+</svg>

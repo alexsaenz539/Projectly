@@ -1,0 +1,30 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+}
+.projectly-brand {
+  display: inline-flex;
+  align-items: center;
+}
+img {
+  display: block;
+  object-fit: contain;
+}
+.brand-full {
+  width: 175px;
+  height: 40px;
+}
+.brand-dark {
+  display: none;
+}
+.brand-symbol {
+  width: 40px;
+  height: 40px;
+}
+:host-context(.dark) .brand-light {
+  display: none;
+}
+:host-context(.dark) .brand-dark {
+  display: block;
+}

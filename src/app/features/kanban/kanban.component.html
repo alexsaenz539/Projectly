@@ -1,0 +1,57 @@
+<app-page-header
+  title="Tablero Kanban"
+  eyebrow="Flujo de trabajo"
+  subtitle="Arrastra los tickets entre columnas o cambia el estado desde su tarjeta."
+  ><button class="btn btn-primary" (click)="editor.open('ticket')">
+    <app-icon name="plus" />Crear ticket
+  </button></app-page-header
+>
+<div class="kanban" cdkDropListGroup>
+  @for (status of statuses; track status) {
+    <section
+      class="kanban-col"
+      cdkDropList
+      [cdkDropListData]="status"
+      [cdkDropListDisabled]="store.busy()"
+      (cdkDropListDropped)="drop($event)"
+    >
+      <div class="kanban-head">
+        <span>{{ status }}</span
+        ><span class="kanban-count">{{ tickets(status).length }}</span>
+      </div>
+      @for (t of tickets(status); track t.id) {
+        <article class="kanban-card" cdkDrag [cdkDragData]="t">
+          <div class="flex justify-between items-center">
+            <span class="mono muted">{{ t.key }}</span
+            ><button class="drag-handle" cdkDragHandle [attr.aria-label]="'Arrastrar ' + t.key">
+              <app-icon name="grip-vertical" />
+            </button>
+          </div>
+          <strong
+            ><button class="card-link" (click)="editor.open('ticket', t)">
+              {{ t.title }}
+            </button></strong
+          ><span class="subline"
+            >{{ store.project(t.project_id)?.name }} ·
+            {{ store.member(t.assignee)?.name || 'Sin asignar' }}</span
+          >
+          <div class="mt-3"><app-badge [value]="t.priority" /></div>
+          <select
+            class="select"
+            [attr.aria-label]="'Cambiar estado de ' + t.key"
+            [ngModel]="t.status"
+            [disabled]="store.busy()"
+            (ngModelChange)="store.moveTicket(t, $event)"
+          >
+            @for (s of statuses; track s) {
+              <option>{{ s }}</option>
+            }
+          </select>
+        </article>
+      }
+      @if (!tickets(status).length) {
+        <p class="helper text-center mt-6">Arrastra un ticket aquí</p>
+      }
+    </section>
+  }
+</div>

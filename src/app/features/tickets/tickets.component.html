@@ -1,0 +1,39 @@
+<app-page-header
+  title="Tickets"
+  eyebrow="Trabajo diario"
+  subtitle="Busca, filtra y abre cada ticket para editar sus datos."
+  ><button class="btn btn-primary" (click)="editor.open('ticket')">
+    <app-icon name="plus" />Crear ticket
+  </button></app-page-header
+>
+<div class="toolbar">
+  <input
+    class="field"
+    type="search"
+    placeholder="Buscar por ID o título"
+    aria-label="Buscar tickets"
+    [ngModel]="query()"
+    (ngModelChange)="query.set($event)"
+  /><select
+    class="select"
+    aria-label="Filtrar por estado"
+    [ngModel]="status()"
+    (ngModelChange)="status.set($event)"
+  >
+    <option value="">Todos los estados</option>
+    @for (s of statuses; track s) {
+      <option>{{ s }}</option>
+    }</select
+  ><select
+    class="select"
+    aria-label="Filtrar por proyecto"
+    [ngModel]="project()"
+    (ngModelChange)="project.set($event)"
+  >
+    <option value="">Todos los proyectos</option>
+    @for (p of store.projects(); track p.id) {
+      <option [value]="p.id">{{ p.name }}</option>
+    }</select
+  ><span class="count-note">{{ visible().length }} de {{ store.tickets().length }} tickets</span>
+</div>
+<section class="card card-pad"><app-ticket-table [tickets]="visible()" /></section>

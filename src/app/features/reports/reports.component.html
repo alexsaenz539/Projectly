@@ -1,0 +1,72 @@
+<app-page-header
+  title="Reportes"
+  eyebrow="Análisis"
+  subtitle="Indicadores calculados a partir de los tickets de tu espacio."
+  ><button class="btn" (click)="exportCsv()">Exportar CSV</button></app-page-header
+>
+<div class="grid metrics">
+  <div class="card metric">
+    <span class="metric-label">Tickets totales</span
+    ><strong class="metric-value">{{ store.tickets().length }}</strong
+    ><span class="metric-note">En el espacio de trabajo</span>
+  </div>
+  <div class="card metric">
+    <span class="metric-label">Tasa de finalización</span
+    ><strong class="metric-value">{{ rate() }}%</strong
+    ><span class="metric-note">Tickets completados</span>
+  </div>
+  <div class="card metric">
+    <span class="metric-label">Proyectos</span
+    ><strong class="metric-value">{{ store.projects().length }}</strong
+    ><span class="metric-note">Activos y archivados</span>
+  </div>
+  <div class="card metric">
+    <span class="metric-label">Responsables</span
+    ><strong class="metric-value">{{ store.members().length }}</strong
+    ><span class="metric-note">En el directorio</span>
+  </div>
+</div>
+<div class="grid content-grid">
+  <section class="card card-pad">
+    <div class="card-header"><h2 class="card-title">Distribución por estado</h2></div>
+    <app-status-chart />
+  </section>
+  <section class="card card-pad">
+    <div class="card-header"><h2 class="card-title">Carga de trabajo</h2></div>
+    <div class="list-simple">
+      @for (m of store.members(); track m.id) {
+        <div class="list-row">
+          <strong>{{ m.name }}</strong
+          ><span class="spacer"></span><span class="helper">{{ workload(m.id) }} abiertos</span>
+        </div>
+      } @empty {
+        <p class="helper">Sin responsables.</p>
+      }
+    </div>
+  </section>
+</div>
+<section class="card card-pad section-gap">
+  <h2 class="card-title mb-5">Avance por proyecto</h2>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Proyecto</th>
+          <th>Total</th>
+          <th>Completados</th>
+          <th>Avance</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of store.projects(); track p.id) {
+          <tr>
+            <td>{{ p.name }}</td>
+            <td>{{ count(p.id) }}</td>
+            <td>{{ count(p.id, true) }}</td>
+            <td>{{ store.progress(p.id) }}%</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

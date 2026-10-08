@@ -1,0 +1,41 @@
+<app-page-header
+  title="Proyectos"
+  subtitle="Organiza el trabajo y sigue el avance de cada proyecto."
+  ><button class="btn btn-primary" (click)="editor.open('project')">
+    <app-icon name="plus" />Nuevo proyecto
+  </button></app-page-header
+>
+<div class="toolbar">
+  <label class="helper flex gap-2 items-center"
+    ><input type="checkbox" [ngModel]="archived()" (ngModelChange)="archived.set($event)" /> Mostrar
+    archivados</label
+  >
+</div>
+<div class="grid project-grid">
+  @for (p of visible(); track p.id) {
+    <article class="card project-card" [class.highlight-card]="selected() === p.id">
+      <span class="project-meta">{{ p.key }} · {{ p.status }}</span>
+      <h2>{{ p.name }}</h2>
+      <p>{{ p.description || 'Sin descripción' }}</p>
+      <div class="progress-item">
+        <div class="progress-row">
+          <strong>{{ p.name }}</strong
+          ><span>{{ store.progress(p.id) }}%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" [style.width.%]="store.progress(p.id)"></div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span
+          >{{ ticketCount(p.id) }} tickets ·
+          {{ store.member(p.owner)?.name || 'Sin responsable' }}</span
+        ><button class="btn btn-quiet" (click)="editor.open('project', p)">Editar</button>
+      </div>
+    </article>
+  } @empty {
+    <div class="card empty">
+      <strong>No hay proyectos en esta vista</strong>Crea un proyecto o muestra los archivados.
+    </div>
+  }
+</div>

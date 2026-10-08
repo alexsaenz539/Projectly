@@ -1,0 +1,115 @@
+<app-page-header
+  title="Configuración"
+  eyebrow="Administración"
+  subtitle="Personaliza el espacio y elige qué tareas quieres seguir."
+/>
+<div class="settings-grid">
+  @if (updates.isDesktop) {
+    <section class="card settings-card">
+      <h2>Actualizaciones de la aplicación</h2>
+      @if (updates.state(); as state) {
+        <p>Versión instalada: {{ state.currentVersion }}</p>
+        <div class="notice" role="status">{{ state.message }}</div>
+        @if (state.status === 'downloading') {
+          <p class="helper mt-3">
+            Descargando versión {{ state.availableVersion }} · {{ state.progress }}%
+          </p>
+          <progress [value]="state.progress" max="100" aria-label="Progreso de descarga"></progress>
+        }
+        @if (state.status === 'ready') {
+          <p class="helper mt-3">
+            Guarda tu trabajo antes de continuar. La aplicación se reiniciará.
+          </p>
+          <button class="btn btn-primary mt-3" (click)="updates.install()">
+            Instalar actualización
+          </button>
+        } @else if (state.enabled) {
+          <button class="btn mt-3" [disabled]="updates.working()" (click)="updates.check()">
+            {{ state.status === 'checking' ? 'Buscando…' : 'Buscar actualizaciones' }}
+          </button>
+        }
+        @if (state.lastCheckedAt) {
+          <p class="helper mt-3">
+            La aplicación también busca versiones automáticamente al abrir y cada hora.
+          </p>
+        }
+      }
+      @if (updates.error()) {
+        <p class="form-error mt-3" role="alert">{{ updates.error() }}</p>
+      }
+    </section>
+  }
+  <section class="card settings-card">
+    <h2>Apariencia</h2>
+    <p>Las preferencias se guardan en este navegador.</p>
+    <label class="switch-row"
+      >Tema oscuro<input
+        type="checkbox"
+        [ngModel]="store.preferences().dark"
+        (ngModelChange)="store.setPreference('dark', $event)" /></label
+    ><label class="switch-row"
+      >Navegación compacta<input
+        type="checkbox"
+        [ngModel]="store.preferences().collapsed"
+        (ngModelChange)="store.setPreference('collapsed', $event)" /></label
+    ><label class="switch-row"
+      >Tablas compactas<input
+        type="checkbox"
+        [ngModel]="store.preferences().dense"
+        (ngModelChange)="store.setPreference('dense', $event)"
+    /></label>
+  </section>
+  <section class="card settings-card">
+    <h2>Trabajo personal</h2>
+    <p>Elige el responsable cuyo trabajo aparece en Mis tareas.</p>
+    <label class="form-row"
+      >Mi perfil<select
+        class="select"
+        [ngModel]="store.myMemberId()"
+        (ngModelChange)="store.setPreference('myMemberId', $event)"
+      >
+        <option value="">Primer responsable</option>
+        @for (m of store.members(); track m.id) {
+          <option [value]="m.id">{{ m.name }}</option>
+        }
+      </select></label
+    >
+    <p class="helper mt-4">
+      Atajos: Ctrl K para buscar · C para crear un ticket · Escape para cerrar un diálogo.
+    </p>
+  </section>
+  <section class="card settings-card">
+    <h2>Datos del espacio</h2>
+    <p>
+      {{
+        store.auth.isDemo
+          ? 'Estás usando datos locales de demostración.'
+          : 'Tu espacio personal se guarda en tu cuenta.'
+      }}
+    </p>
+    <button class="btn" (click)="exportBackup()">Descargar respaldo JSON</button>
+    @if (store.auth.isDemo) {
+      <button class="btn btn-danger mt-3" (click)="confirmReset.set(true)">
+        Restablecer demostración
+      </button>
+      @if (confirmReset()) {
+        <div class="notice mt-4">
+          Se reemplazarán los datos locales. Descarga un respaldo para conservarlos.
+          <div class="header-actions mt-3">
+            <button class="btn btn-danger" (click)="store.resetDemo(); confirmReset.set(false)">
+              Restablecer datos</button
+            ><button class="btn" (click)="confirmReset.set(false)">Cancelar</button>
+          </div>
+        </div>
+      }
+    }
+  </section>
+  <section class="card settings-card">
+    <h2>Sobre Projectly</h2>
+    <p>Proyectos, tickets y planificación en un solo espacio.</p>
+    <div class="notice">
+      {{ store.auth.isDemo ? 'Modo de demostración' : 'Cuenta: ' + store.auth.user()?.email
+      }}<br />{{ store.projects().length }} proyectos · {{ store.tickets().length }} tickets
+    </div>
+  </section>
+</div>

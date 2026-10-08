@@ -1,0 +1,65 @@
+<app-page-header
+  [title]="'Buen día, ' + store.myName().split(' ')[0]"
+  eyebrow="Vista general"
+  subtitle="Un resumen de los proyectos y tickets de tu espacio de trabajo."
+  ><button class="btn btn-primary" (click)="editor.open('ticket')">
+    <app-icon name="plus" />Crear ticket
+  </button></app-page-header
+>
+<div class="grid metrics">
+  @for (m of metrics(); track m.label) {
+    <div class="card metric">
+      <span class="metric-label">{{ m.label }}</span
+      ><strong class="metric-value">{{ m.value }}</strong
+      ><span class="metric-note">{{ m.note }}</span>
+    </div>
+  }
+</div>
+<div class="grid content-grid">
+  <section class="card card-pad">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">Tickets por estado</h2>
+        <p class="card-subtitle">Conteo de los tickets guardados</p>
+      </div>
+      <a class="text-link" routerLink="/tickets">Ver tickets</a>
+    </div>
+    <app-status-chart />
+  </section>
+  <section class="card card-pad">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">Progreso por proyecto</h2>
+        <p class="card-subtitle">Tickets completados sobre el total</p>
+      </div>
+    </div>
+    <div class="progress-list">
+      @for (p of store.projects(); track p.id) {
+        @if (p.status === 'Activo') {
+          <div class="progress-item">
+            <div class="progress-row">
+              <strong>{{ p.name }}</strong
+              ><span>{{ store.progress(p.id) }}%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" [style.width.%]="store.progress(p.id)"></div>
+            </div>
+          </div>
+        }
+      }
+      @if (!store.projects().length) {
+        <p class="helper">Aún no hay proyectos activos.</p>
+      }
+    </div>
+  </section>
+</div>
+<section class="card card-pad section-gap">
+  <div class="card-header">
+    <div>
+      <h2 class="card-title">Tickets recientes</h2>
+      <p class="card-subtitle">Trabajo de tu espacio</p>
+    </div>
+    <a class="text-link" routerLink="/tickets">Abrir lista completa</a>
+  </div>
+  <app-ticket-table [tickets]="recent()" />
+</section>

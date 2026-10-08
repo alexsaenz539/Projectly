@@ -1,0 +1,35 @@
+@if (tickets().length) {
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Ticket</th>
+          <th>Proyecto</th>
+          <th>Estado</th>
+          <th>Prioridad</th>
+          <th>Responsable</th>
+          <th>Vence</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of tickets(); track t.id) {
+          <tr>
+            <td class="title-cell">
+              <button class="text-link" (click)="editor.open('ticket', t)">{{ t.title }}</button
+              ><span class="subline mono">{{ t.key }}</span>
+            </td>
+            <td>{{ store.project(t.project_id)?.name }}</td>
+            <td><app-badge [value]="t.status" /></td>
+            <td><app-badge [value]="t.priority" /></td>
+            <td>{{ store.member(t.assignee)?.name || 'Sin asignar' }}</td>
+            <td>{{ t.due ? (t.due + 'T12:00:00' | date: 'dd MMM yyyy') : 'Sin fecha' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+} @else {
+  <div class="empty">
+    <strong>No hay tickets en esta vista</strong>Prueba otro filtro o crea un ticket.
+  </div>
+}

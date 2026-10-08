@@ -1,0 +1,43 @@
+@if (updates.state(); as state) {
+  @if (
+    state.status === 'downloading' || state.status === 'ready' || state.status === 'installing'
+  ) {
+    <aside
+      class="desktop-update-banner"
+      aria-label="Actualización de la aplicación"
+      aria-live="polite"
+    >
+      <div class="desktop-update-copy">
+        <strong>{{
+          state.status === 'ready'
+            ? 'Nueva versión disponible'
+            : state.status === 'installing'
+              ? 'Instalando actualización'
+              : 'Descargando nueva versión'
+        }}</strong>
+        <p>
+          {{ state.availableVersion ? 'Versión ' + state.availableVersion + ' · ' : ''
+          }}{{
+            state.status === 'downloading'
+              ? state.progress + '%'
+              : state.status === 'ready'
+                ? 'Guarda tu trabajo. La aplicación se reiniciará.'
+                : 'La aplicación se reiniciará al terminar.'
+          }}
+        </p>
+        @if (state.status === 'downloading') {
+          <progress [value]="state.progress" max="100" aria-label="Progreso de descarga"></progress>
+        }
+        @if (updates.error()) {
+          <p role="alert" class="form-error">{{ updates.error() }}</p>
+        }
+      </div>
+      @if (state.status === 'ready') {
+        <button class="btn btn-primary" (click)="updates.install()">Instalar actualización</button>
+      }
+      @if (state.status === 'installing') {
+        <button class="btn" disabled>Instalando…</button>
+      }
+    </aside>
+  }
+}

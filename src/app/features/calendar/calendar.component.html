@@ -1,0 +1,32 @@
+<app-page-header
+  title="Calendario"
+  eyebrow="Planificación"
+  subtitle="Fechas de vencimiento de los tickets del espacio."
+  ><div class="month-nav">
+    <button class="icon-btn" aria-label="Mes anterior" (click)="move(-1)">
+      <app-icon name="chevron-left" /></button
+    ><span class="month-title">{{ month() | date: 'MMMM yyyy' }}</span
+    ><button class="icon-btn" aria-label="Mes siguiente" (click)="move(1)">
+      <app-icon name="chevron-right" /></button
+    ><button class="btn" (click)="today()">Hoy</button>
+  </div></app-page-header
+>
+<div class="calendar">
+  @for (d of weekdays; track d) {
+    <div class="calendar-head">{{ d }}</div>
+  }
+  @for (d of days(); track d.iso) {
+    <div class="calendar-day" [class.other]="d.other" [class.today]="d.iso === todayIso">
+      <span class="day-num">{{ d.date.getDate() }}</span>
+      @for (t of d.tickets; track t.id) {
+        <button
+          class="day-event"
+          [attr.aria-label]="t.key + ' ' + t.title"
+          (click)="editor.open('ticket', t)"
+        >
+          {{ t.key }} · {{ t.title }}
+        </button>
+      }
+    </div>
+  }
+</div>

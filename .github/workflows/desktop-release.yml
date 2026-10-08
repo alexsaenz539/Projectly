@@ -1,0 +1,29 @@
+name: Build Windows release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22.22.3'
+          cache: npm
+      - name: Check release version
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ($env:GITHUB_REF_NAME -ne "v$version") { throw 'The tag must match the version in package.json.' }
+      - run: npm ci
+      - run: npm test
+      - name: Build installer and upload draft release
+        run: npm run desktop:publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

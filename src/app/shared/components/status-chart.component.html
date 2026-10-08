@@ -1,0 +1,17 @@
+@if (store.tickets().length) {
+  <div role="img" [attr.aria-label]="summary()">
+    <apx-chart
+      [series]="series()"
+      [chart]="chart"
+      [xaxis]="xaxis()"
+      [plotOptions]="plotOptions"
+      [dataLabels]="dataLabels"
+      [colors]="colors"
+      [tooltip]="tooltip"
+      [theme]="theme()"
+    />
+  </div>
+} @else {
+  <div class="empty"><strong>Aún no hay datos</strong>Crea tickets para ver el gráfico.</div>
+}
+<div class="sr-only">{{ summary() }}</div>

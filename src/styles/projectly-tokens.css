@@ -1,0 +1,58 @@
+/**
+ * Projectly - Paleta Cromática y Tokens de Color
+ * Basado en las especificaciones oficiales de la marca.
+ */
+
+:root {
+  /* Colores Principales */
+  --projectly-primary: #111827; /* Primario: Títulos, textos y elementos principales */
+  --projectly-primary-rgb: 17, 24, 39;
+
+  --projectly-gray: #6b7280; /* Gris: Texto secundario y detalles sutiles */
+  --projectly-gray-rgb: 107, 114, 128;
+
+  --projectly-bg: #fafaf9; /* Fondo: Superficie base limpia */
+  --projectly-bg-rgb: 250, 250, 249;
+
+  --projectly-surface: #ffffff; /* Superficie de tarjetas y modales */
+  --projectly-surface-rgb: 255, 255, 255;
+
+  /* Colores de Acento */
+  --projectly-accent-orange: #f59e0b; /* Naranja: Atención, alertas, acento */
+  --projectly-accent-orange-rgb: 245, 158, 11;
+
+  --projectly-accent-green: #10b981; /* Verde: Progreso, éxito, acción afirmativa */
+  --projectly-accent-green-rgb: 16, 185, 129;
+
+  --projectly-secondary: #cbd5e1; /* Secundario: Bordes, divisores */
+  --projectly-secondary-rgb: 203, 213, 225;
+
+  /* Estados y Etiquetas */
+  --projectly-status-completed-bg: #ecfdf5;
+  --projectly-status-completed-text: #065f46;
+  --projectly-status-completed-dot: #10b981;
+
+  --projectly-status-progress-bg: #fffbeb;
+  --projectly-status-progress-text: #92400e;
+  --projectly-status-progress-dot: #f59e0b;
+
+  --projectly-status-pending-bg: #f1f5f9;
+  --projectly-status-pending-text: #334155;
+  --projectly-status-pending-dot: #64748b;
+
+  --projectly-status-blocked-bg: #fef2f2;
+  --projectly-status-blocked-text: #991b1b;
+  --projectly-status-blocked-dot: #ef4444;
+
+  /* Sombras y Elevaciones */
+  --projectly-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --projectly-shadow-card: 0 4px 14px 0 rgba(0, 0, 0, 0.04), 0 1px 3px 0 rgba(0, 0, 0, 0.02);
+  --projectly-shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+
+  /* Radios de Borde */
+  --projectly-radius-sm: 6px;
+  --projectly-radius-md: 10px;
+  --projectly-radius-lg: 14px;
+  --projectly-radius-xl: 16px;
+  --projectly-radius-full: 9999px;
+}

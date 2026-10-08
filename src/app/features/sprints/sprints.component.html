@@ -1,0 +1,45 @@
+<app-page-header
+  title="Sprints"
+  eyebrow="Planificación"
+  subtitle="Define objetivos y fechas; asigna tickets desde su detalle."
+  ><button class="btn btn-primary" (click)="editor.open('sprint')">
+    <app-icon name="plus" />Crear sprint
+  </button></app-page-header
+>
+<div class="stack">
+  @for (s of store.sprints(); track s.id) {
+    <article class="card card-pad">
+      <div class="card-header">
+        <div>
+          <p class="eyebrow">{{ store.project(s.project_id)?.name }}</p>
+          <h2 class="card-title">{{ s.name }}</h2>
+          <p class="card-subtitle">
+            {{ s.start + 'T12:00:00' | date: 'dd MMM yyyy' }} –
+            {{ s.end + 'T12:00:00' | date: 'dd MMM yyyy' }}
+          </p>
+        </div>
+        <app-badge [value]="s.status" />
+      </div>
+      <p class="helper">{{ s.goal || 'Sin objetivo definido' }}</p>
+      <p class="helper">{{ count(s.id) }} tickets asignados · {{ completed(s.id) }} completados</p>
+      <div class="progress-track my-4">
+        <div
+          class="progress-fill"
+          [style.width.%]="count(s.id) ? (completed(s.id) / count(s.id)) * 100 : 0"
+        ></div>
+      </div>
+      <div class="header-actions">
+        <button class="btn" (click)="editor.open('sprint', s)">Editar</button>
+        @if (s.status !== 'Cerrado') {
+          <button class="btn" [disabled]="store.busy()" (click)="toggle(s)">
+            {{ s.status === 'Activo' ? 'Cerrar sprint' : 'Iniciar sprint' }}
+          </button>
+        }
+      </div>
+    </article>
+  } @empty {
+    <div class="card empty">
+      <strong>Aún no hay sprints</strong>Crea uno para planificar el trabajo.
+    </div>
+  }
+</div>

@@ -1,0 +1,52 @@
+{
+  "name": "project-os",
+  "version": "0.1.1",
+  "main": "electron/main.cjs",
+  "description": "Projectly: administrador de proyectos para Windows",
+  "author": "Alex Saenz",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "node --test tests/*.test.mjs",
+    "desktop:start": "npm run build && electron .",
+    "desktop:dev": "electron . --dev",
+    "desktop:smoke": "npm run build && electron . --smoke-test",
+    "desktop:pack": "npm run build && electron-builder --config electron-builder.config.cjs --win --dir --publish never",
+    "desktop:dist": "npm run build && electron-builder --config electron-builder.config.cjs --win nsis --publish never",
+    "desktop:publish": "npm run build && electron-builder --config electron-builder.config.cjs --win nsis --publish always"
+  },
+  "private": true,
+  "packageManager": "npm@10.9.8",
+  "dependencies": {
+    "@angular/cdk": "22.2.2",
+    "@angular/common": "^22.2.0",
+    "@angular/compiler": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/forms": "^22.2.0",
+    "@angular/platform-browser": "^22.2.0",
+    "@angular/router": "^22.2.0",
+    "@lucide/angular": "1.53.0",
+    "@supabase/supabase-js": "2.117.3",
+    "apexcharts": "7.8.0",
+    "electron-updater": "6.8.9",
+    "gsap": "^3.15.0",
+    "ng-apexcharts": "3.1.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.2.2",
+    "@angular/cli": "^22.2.2",
+    "@angular/compiler-cli": "^22.2.0",
+    "@electric-sql/pglite": "0.5.8",
+    "@tailwindcss/postcss": "4.3.3",
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3",
+    "postcss": "8.5.29",
+    "prettier": "^3.8.1",
+    "tailwindcss": "4.3.3",
+    "typescript": "~6.0.2"
+  }
+}

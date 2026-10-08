@@ -1,0 +1,207 @@
+<section class="dialog" aria-labelledby="editor-title">
+  <div class="dialog-head">
+    <h2 id="editor-title">{{ existing ? 'Editar' : 'Nuevo' }} {{ labels[data.kind] }}</h2>
+    <button class="icon-btn" type="button" aria-label="Cerrar" (click)="ref.close()">
+      <app-icon name="x" />
+    </button>
+  </div>
+  <form (ngSubmit)="save()" class="form-grid">
+    @if (data.kind === 'ticket') {
+      <div class="form-row">
+        <label for="title">Título</label
+        ><input
+          id="title"
+          name="title"
+          required
+          maxlength="120"
+          [(ngModel)]="model['title']"
+          placeholder="¿Qué hay que hacer?"
+        />
+      </div>
+    } @else {
+      <div class="form-row">
+        <label for="name">Nombre</label
+        ><input id="name" name="name" required maxlength="90" [(ngModel)]="model['name']" />
+      </div>
+    }
+    @if (data.kind === 'project') {
+      <div class="form-row">
+        <label for="key">Clave</label
+        ><input
+          id="key"
+          name="key"
+          required
+          pattern="[A-Za-z0-9]{2,6}"
+          maxlength="6"
+          placeholder="Ej. WEB"
+          [(ngModel)]="model['key']"
+        />
+      </div>
+    }
+    @if (data.kind === 'project' || data.kind === 'ticket') {
+      <div class="form-row">
+        <label for="description">Descripción</label
+        ><textarea
+          id="description"
+          name="description"
+          maxlength="1000"
+          [(ngModel)]="model['description']"
+        ></textarea>
+      </div>
+    }
+    @if (data.kind === 'ticket' || data.kind === 'sprint') {
+      <div class="form-row">
+        <label for="project">Proyecto</label
+        ><select
+          id="project"
+          name="project_id"
+          required
+          [(ngModel)]="model['project_id']"
+          (ngModelChange)="projectChanged()"
+        >
+          <option value="" disabled>Seleccionar proyecto</option>
+          @for (p of store.projects(); track p.id) {
+            <option [value]="p.id">
+              {{ p.name }}{{ p.status === 'Archivado' ? ' (archivado)' : '' }}
+            </option>
+          }
+        </select>
+      </div>
+    }
+    @if (data.kind === 'ticket') {
+      <div class="grid grid-cols-2">
+        <div class="form-row">
+          <label for="type">Tipo</label
+          ><select id="type" name="type" [(ngModel)]="model['type']">
+            @for (type of ['Tarea', 'Bug', 'Mejora']; track type) {
+              <option>{{ type }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="priority">Prioridad</label
+          ><select id="priority" name="priority" [(ngModel)]="model['priority']">
+            @for (p of priorities; track p) {
+              <option>{{ p }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="status">Estado</label
+        ><select id="status" name="status" [(ngModel)]="model['status']">
+          @for (s of statuses; track s) {
+            <option>{{ s }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="assignee">Responsable</label
+        ><select id="assignee" name="assignee" [(ngModel)]="model['assignee']">
+          <option value="">Sin asignar</option>
+          @for (m of store.members(); track m.id) {
+            <option [value]="m.id">{{ m.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="grid grid-cols-2">
+        <div class="form-row">
+          <label for="due">Vence</label
+          ><input id="due" name="due" type="date" [(ngModel)]="model['due']" />
+        </div>
+        <div class="form-row">
+          <label for="sprint">Sprint</label
+          ><select id="sprint" name="sprint" [(ngModel)]="model['sprint_id']">
+            <option value="">Sin sprint</option>
+            @for (s of availableSprints; track s.id) {
+              <option [value]="s.id">{{ s.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    }
+    @if (data.kind === 'project') {
+      <div class="form-row">
+        <label for="owner">Responsable</label
+        ><select id="owner" name="owner" [(ngModel)]="model['owner']">
+          <option value="">Sin responsable</option>
+          @for (m of store.members(); track m.id) {
+            <option [value]="m.id">{{ m.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="status">Estado</label
+        ><select id="status" name="status" [(ngModel)]="model['status']">
+          <option>Activo</option>
+          <option>Archivado</option>
+        </select>
+      </div>
+    }
+    @if (data.kind === 'sprint') {
+      <div class="form-row">
+        <label for="goal">Objetivo</label
+        ><textarea id="goal" name="goal" maxlength="300" [(ngModel)]="model['goal']"></textarea>
+      </div>
+      <div class="grid grid-cols-2">
+        <div class="form-row">
+          <label for="start">Inicio</label
+          ><input id="start" name="start" type="date" required [(ngModel)]="model['start']" />
+        </div>
+        <div class="form-row">
+          <label for="end">Fin</label
+          ><input id="end" name="end" type="date" required [(ngModel)]="model['end']" />
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="status">Estado</label
+        ><select id="status" name="status" [(ngModel)]="model['status']">
+          <option>Planificado</option>
+          <option>Activo</option>
+          <option>Cerrado</option>
+        </select>
+      </div>
+    }
+    @if (data.kind === 'member') {
+      <div class="form-row">
+        <label for="email">Correo</label
+        ><input id="email" name="email" type="email" required [(ngModel)]="model['email']" />
+      </div>
+      <div class="form-row">
+        <label for="role">Rol</label
+        ><select id="role" name="role" [(ngModel)]="model['role']">
+          @for (r of ['Administradora', 'Project Manager', 'Miembro', 'Lector']; track r) {
+            <option>{{ r }}</option>
+          }
+        </select>
+      </div>
+      <p class="helper">
+        Registro de tu directorio. No envía una invitación ni concede acceso a tu cuenta.
+      </p>
+    }
+    @if (error) {
+      <p class="form-error" role="alert">{{ error }}</p>
+    }
+    @if (confirmDelete) {
+      <div class="notice">
+        ¿Eliminar este ticket?
+        <button type="button" class="btn btn-danger" [disabled]="store.busy()" (click)="remove()">
+          Sí, eliminar</button
+        ><button type="button" class="btn" (click)="confirmDelete = false">Cancelar</button>
+      </div>
+    }
+    <div class="form-actions">
+      @if (existing && data.kind === 'ticket') {
+        <button type="button" class="btn btn-danger mr-auto" (click)="confirmDelete = true">
+          Eliminar
+        </button>
+      }
+      <button type="button" class="btn" (click)="ref.close()">Cancelar</button
+      ><button type="submit" class="btn btn-primary" [disabled]="store.busy()">
+        {{
+          store.busy() ? 'Guardando…' : existing ? 'Guardar cambios' : 'Crear ' + labels[data.kind]
+        }}
+      </button>
+    </div>
+  </form>
+</section>

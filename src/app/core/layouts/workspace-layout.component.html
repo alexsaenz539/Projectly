@@ -1,0 +1,92 @@
+<div class="app" [class.collapsed]="store.preferences().collapsed">
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" routerLink="/dashboard" aria-label="Projectly, inicio">
+        <app-brand-logo [compact]="store.preferences().collapsed" />
+      </a>
+      <span class="workspace"
+        >Espacio de trabajo <app-icon name="chevron-right" [size]="14"
+      /></span>
+      <span class="demo-tag">{{
+        store.auth.isDemo ? 'Datos de demostración' : 'Mi espacio personal'
+      }}</span>
+      <div class="top-spacer"></div>
+      <div class="topbar-actions">
+        <button class="search-launch" aria-label="Buscar tickets y proyectos" (click)="search()">
+          <app-icon name="search" /><span>Buscar en el espacio</span><kbd>Ctrl K</kbd>
+        </button>
+        <button
+          class="icon-btn desktop-toggle"
+          aria-label="Contraer o expandir navegación"
+          (click)="store.setPreference('collapsed', !store.preferences().collapsed)"
+        >
+          <app-icon name="menu" />
+        </button>
+        <button
+          class="icon-btn"
+          aria-label="Cambiar tema"
+          (click)="store.setPreference('dark', !store.preferences().dark)"
+        >
+          <app-icon [name]="store.preferences().dark ? 'sun' : 'moon'" />
+        </button>
+        <a
+          class="icon-btn notification-icon"
+          routerLink="/notifications"
+          aria-label="Notificaciones"
+          ><app-icon name="bell" />
+          @if (store.unread()) {
+            <span class="notification-dot"></span>
+          }
+        </a>
+        <a class="avatar" routerLink="/settings" [attr.aria-label]="store.myName()">{{
+          store.myName() | initials
+        }}</a>
+      </div>
+    </header>
+    <aside class="sidebar" aria-label="Navegación principal">
+      @for (group of groups; track group) {
+        <div class="nav-group">
+          <p class="nav-heading">{{ group }}</p>
+          @for (item of navigation; track item.path) {
+            @if (item.group === group) {
+              <a
+                class="nav-link"
+                [routerLink]="item.path"
+                routerLinkActive="active"
+                ariaCurrentWhenActive="page"
+                [title]="item.name"
+                ><app-icon [name]="item.icon" /><span class="nav-label">{{ item.name }}</span></a
+              >
+            }
+          }
+        </div>
+      }
+      <div class="sidebar-footer">
+        <p>
+          {{
+            store.auth.isDemo
+              ? 'Prototipo local · Los cambios se guardan en este navegador.'
+              : 'Espacio personal · Tus datos se sincronizan con tu cuenta.'
+          }}
+        </p>
+        @if (!store.auth.isDemo) {
+          <button class="btn btn-quiet mt-3" (click)="logout()">Cerrar sesión</button>
+        }
+      </div>
+    </aside>
+    <main class="main" id="main">
+      @if (store.error()) {
+        <div class="notice mb-4" role="alert">
+          {{ store.error() }} <button class="btn" (click)="store.refresh()">Reintentar</button>
+        </div>
+      }
+      @if (store.loading()) {
+        <p class="helper" role="status">Sincronizando datos…</p>
+      }
+      <router-outlet />
+    </main>
+  </div>
+</div>
+@if (store.toast()) {
+  <div class="toast" role="status" aria-live="polite">{{ store.toast() }}</div>
+}

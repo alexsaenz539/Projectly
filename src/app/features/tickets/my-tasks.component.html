@@ -1,0 +1,55 @@
+<app-page-header
+  title="Mis tareas"
+  eyebrow="Trabajo personal"
+  [subtitle]="'Tickets asignados a ' + store.myName() + '.'"
+/>
+<div class="toolbar">
+  @for (f of filters; track f) {
+    <button
+      class="btn"
+      [class.btn-primary]="filter() === f"
+      [attr.aria-pressed]="filter() === f"
+      (click)="filter.set(f)"
+    >
+      {{ f }}
+    </button>
+  }
+  <span class="count-note">{{ visible().length }} tareas</span>
+</div>
+<section class="card card-pad">
+  @if (visible().length) {
+    <div class="list-simple">
+      @for (t of visible(); track t.id) {
+        <article class="list-row">
+          <div>
+            <span class="mono muted">{{ t.key }} · {{ store.project(t.project_id)?.name }}</span>
+            <p>
+              <button class="text-link" (click)="editor.open('ticket', t)">
+                {{ t.title }}
+              </button>
+            </p>
+            <span class="subline"
+              ><app-badge [value]="t.status" /> · Vence
+              {{ t.due ? (t.due + 'T12:00:00' | date: 'dd MMM yyyy') : 'Sin fecha' }}</span
+            >
+          </div>
+          <span class="spacer"></span>
+          @if (t.status !== 'Completado') {
+            <button
+              class="btn"
+              [disabled]="store.busy()"
+              (click)="store.moveTicket(t, 'Completado')"
+            >
+              Completar
+            </button>
+          }
+        </article>
+      }
+    </div>
+  } @else {
+    <div class="empty">
+      <strong>No hay tareas en esta vista</strong>Selecciona otro periodo o asigna tickets a tu
+      perfil.
+    </div>
+  }
+</section>

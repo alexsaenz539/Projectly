@@ -1,0 +1,33 @@
+<span class="projectly-brand" [class.projectly-brand-compact]="compact()">
+  @if (!compact()) {
+    <img
+      class="brand-full brand-light"
+      src="brand/projectly-logo-principal-1024w.png"
+      alt="Projectly"
+      width="280"
+      height="64"
+    />
+    <img
+      class="brand-full brand-dark"
+      src="brand/projectly-logo-inverso-1024w.png"
+      alt="Projectly"
+      width="280"
+      height="64"
+    />
+  } @else {
+    <img
+      class="brand-symbol brand-light"
+      src="brand/projectly-icono-color.svg"
+      alt="Projectly"
+      width="100"
+      height="100"
+    />
+    <img
+      class="brand-symbol brand-dark"
+      src="brand/projectly-icono-inverso.svg"
+      alt="Projectly"
+      width="100"
+      height="100"
+    />
+  }
+</span>
