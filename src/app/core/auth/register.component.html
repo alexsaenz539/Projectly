@@ -1,0 +1,155 @@
+<app-auth-shell [registration]="true" [demo]="auth.isDemo">
+  <p class="auth-eyebrow">Empieza aquí</p>
+  <h1>Crea tu<br />usuario.</h1>
+  <p class="auth-intro">
+    Prepara tu acceso a un espacio donde el trabajo se entiende de un vistazo.
+  </p>
+  @if (!success()) {
+    <form class="auth-form" (ngSubmit)="submit()" novalidate [attr.aria-busy]="busy()">
+      <div class="auth-field">
+        <label for="signup-fullName">Nombre completo</label
+        ><input
+          id="signup-fullName"
+          name="fullName"
+          type="text"
+          autocomplete="name"
+          placeholder="Tu nombre y apellidos"
+          required
+          minlength="2"
+          maxlength="100"
+          [(ngModel)]="fullName"
+          (ngModelChange)="errors.fullName = ''; message.set('')"
+          [attr.aria-invalid]="!!errors.fullName"
+          aria-describedby="signup-fullName-error"
+          [disabled]="busy()"
+        />
+        <p id="signup-fullName-error" class="auth-error" [hidden]="!errors.fullName">
+          {{ errors.fullName }}
+        </p>
+      </div>
+      <div class="auth-field">
+        <label for="signup-email">Correo electrónico</label
+        ><input
+          id="signup-email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          placeholder="nombre@empresa.com"
+          required
+          [(ngModel)]="email"
+          (ngModelChange)="errors.email = ''; message.set('')"
+          [attr.aria-invalid]="!!errors.email"
+          aria-describedby="signup-email-error"
+          [disabled]="busy()"
+        />
+        <p id="signup-email-error" class="auth-error" [hidden]="!errors.email">
+          {{ errors.email }}
+        </p>
+      </div>
+      <div class="auth-field">
+        <label for="signup-password">Contraseña</label>
+        <div class="auth-password-wrap">
+          <input
+            id="signup-password"
+            name="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            autocomplete="new-password"
+            placeholder="Define una contraseña"
+            required
+            minlength="8"
+            [(ngModel)]="password"
+            (ngModelChange)="errors.password = ''; message.set('')"
+            [attr.aria-invalid]="!!errors.password"
+            aria-describedby="signup-password-error signup-password-help"
+            [disabled]="busy()"
+          /><button
+            class="auth-password-toggle"
+            type="button"
+            (click)="showPassword.set(!showPassword())"
+            [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            [attr.aria-pressed]="showPassword()"
+          >
+            {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </div>
+        <p id="signup-password-help" class="auth-help">Usa al menos 8 caracteres.</p>
+        <p id="signup-password-error" class="auth-error" [hidden]="!errors.password">
+          {{ errors.password }}
+        </p>
+      </div>
+      <div class="auth-field">
+        <label for="signup-confirm">Confirmar contraseña</label>
+        <div class="auth-password-wrap">
+          <input
+            id="signup-confirm"
+            name="confirm"
+            [type]="showConfirm() ? 'text' : 'password'"
+            autocomplete="new-password"
+            placeholder="Repite tu contraseña"
+            required
+            [(ngModel)]="confirm"
+            (ngModelChange)="errors.confirm = ''; message.set('')"
+            [attr.aria-invalid]="!!errors.confirm"
+            aria-describedby="signup-confirm-error"
+            [disabled]="busy()"
+          /><button
+            class="auth-password-toggle"
+            type="button"
+            (click)="showConfirm.set(!showConfirm())"
+            [attr.aria-label]="
+              showConfirm()
+                ? 'Ocultar confirmación de contraseña'
+                : 'Mostrar confirmación de contraseña'
+            "
+            [attr.aria-pressed]="showConfirm()"
+          >
+            {{ showConfirm() ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </div>
+        <p id="signup-confirm-error" class="auth-error" [hidden]="!errors.confirm">
+          {{ errors.confirm }}
+        </p>
+      </div>
+      <button class="auth-submit" type="submit" [disabled]="busy()">
+        {{ busy() ? 'Creando usuario…' : 'Crear usuario' }}<span aria-hidden="true">→</span>
+      </button>
+      <p class="auth-error" role="alert" aria-live="polite" [hidden]="!message()">
+        {{ message() }}
+      </p>
+    </form>
+    <p class="auth-switch">¿Ya tienes un usuario? <a routerLink="/login">Iniciar sesión</a></p>
+    @if (auth.isDemo) {
+      <p class="auth-demo-note">
+        Prototipo: este formulario valida los datos. No crea una cuenta real ni guarda credenciales.
+      </p>
+    }
+  } @else {
+    <section class="auth-success" role="status" aria-live="polite">
+      <span class="auth-success-mark" aria-hidden="true"></span>
+      <h2 tabindex="-1">
+        {{
+          auth.isDemo
+            ? 'Formulario validado'
+            : hasSession()
+              ? 'Tu usuario está listo'
+              : 'Confirma tu correo'
+        }}
+      </h2>
+      <p>
+        {{
+          auth.isDemo
+            ? 'Los datos son válidos. Puedes entrar al espacio de demostración; la creación de cuentas reales estará disponible al conectar Supabase.'
+            : hasSession()
+              ? 'Tu cuenta ya tiene acceso al espacio de trabajo.'
+              : 'Revisa tu correo para confirmar la cuenta. Después podrás iniciar sesión.'
+        }}
+      </p>
+      <a
+        class="auth-submit auth-success-link"
+        [routerLink]="hasSession() ? '/mis-tareas' : '/login'"
+        >{{ hasSession() ? 'Abrir mi espacio' : 'Ir a iniciar sesión'
+        }}<span aria-hidden="true">→</span></a
+      >
+    </section>
+  }
+</app-auth-shell>

@@ -27,6 +27,7 @@ export class WorkspaceLayoutComponent {
   readonly groups = ['Principal', 'Gestión', 'Administración'];
   readonly navigation = [
     { path: '/dashboard', name: 'Dashboard', icon: 'layout-grid', group: 'Principal' },
+    { path: '/workspaces', name: 'Espacios', icon: 'layout-grid', group: 'Principal' },
     { path: '/projects', name: 'Proyectos', icon: 'folder', group: 'Principal' },
     { path: '/tickets', name: 'Tickets', icon: 'ticket', group: 'Principal' },
     { path: '/mis-tareas', name: 'Mis tareas', icon: 'square-check', group: 'Principal' },
@@ -40,7 +41,7 @@ export class WorkspaceLayoutComponent {
   ];
   constructor() {
     effect(() => {
-      if (!this.store.auth.isDemo && !this.store.auth.user()) void this.router.navigate(['/login']);
+      if (!this.store.auth.hasAccess()) void this.router.navigate(['/login']);
     });
   }
   search() {

@@ -1,0 +1,67 @@
+<div class="auth-page projectly-auth" [class.auth-registration]="registration()">
+  <div class="auth-shell">
+    <main class="auth-main">
+      <header class="auth-header">
+        <a class="auth-brand" routerLink="/login" aria-label="Projectly, iniciar sesión"
+          ><app-brand-logo
+        /></a>
+        <span class="auth-header-label">{{ registration() ? 'Nuevo usuario' : 'Acceso' }}</span>
+      </header>
+      <div class="auth-form-wrap" [class.auth-form-wrap-signup]="registration()">
+        <ng-content />
+      </div>
+      <footer class="auth-footer">
+        <span>Projectly</span
+        ><span>{{ demo() ? 'Espacio de demostración' : 'Tu espacio de trabajo' }}</span>
+      </footer>
+    </main>
+    <aside class="auth-aside" aria-label="Vista previa del producto">
+      <div class="auth-aside-copy">
+        <p class="auth-eyebrow">
+          {{ registration() ? 'Un inicio más claro' : 'Claridad en cada etapa' }}
+        </p>
+        <h2>
+          {{
+            registration()
+              ? 'Un lugar para organizar lo que sigue.'
+              : 'Del proyecto al detalle, sin perder el contexto.'
+          }}
+        </h2>
+        <p>
+          {{
+            registration()
+              ? 'Proyectos, tickets y sprints en una misma vista, con el detalle justo para avanzar.'
+              : 'Una vista ordenada para coordinar el trabajo, detectar bloqueos y avanzar con tu equipo.'
+          }}
+        </p>
+      </div>
+      <div class="auth-product-card" aria-label="Ejemplo de tablero de proyectos">
+        <div class="auth-product-top">
+          <span>Espacio de trabajo</span
+          ><span class="auth-product-demo">Vista de demostración</span>
+        </div>
+        <div class="auth-product-heading">
+          <div>
+            <span class="auth-product-kicker">NVA · PROYECTO</span><strong>Nueva plataforma</strong>
+          </div>
+          <span class="auth-product-status">Activo</span>
+        </div>
+        <div class="auth-product-columns">
+          <section class="auth-product-column">
+            <div class="auth-product-column-title"><span>Pendiente</span><small>1</small></div>
+            <article class="auth-mini-ticket">
+              <span>NVA-106</span><strong>Preparar pruebas de navegación</strong>
+            </article>
+          </section>
+          <section class="auth-product-column">
+            <div class="auth-product-column-title"><span>En revisión</span><small>1</small></div>
+            <article class="auth-mini-ticket">
+              <span>NVA-102</span><strong>Diseñar la vista de bienvenida</strong>
+            </article>
+          </section>
+        </div>
+      </div>
+      <p class="auth-aside-foot">Proyectos <span>·</span> Tickets <span>·</span> Sprints</p>
+    </aside>
+  </div>
+</div>

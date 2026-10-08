@@ -1,0 +1,207 @@
+.auth-field {
+  display: grid;
+  gap: 7px;
+}
+.auth-field label {
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.auth-field input {
+  width: 100%;
+  height: 48px;
+  min-width: 0;
+  padding: 0 15px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition:
+    border-color var(--transition-ui),
+    box-shadow var(--transition-ui);
+}
+.auth-field input::placeholder {
+  color: var(--text-secondary);
+  opacity: 1;
+}
+.auth-field input:hover {
+  border-color: var(--text-secondary);
+}
+.auth-field input:focus-visible {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--focus) 22%, transparent);
+  outline: none;
+}
+.auth-field input[aria-invalid='true'] {
+  border-color: var(--auth-error);
+}
+.auth-field input[aria-invalid='true']:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--auth-error) 20%, transparent);
+}
+.auth-password-wrap {
+  position: relative;
+}
+.auth-password-wrap input {
+  padding-right: 92px;
+}
+.auth-password-toggle {
+  position: absolute;
+  right: 4px;
+  top: 2px;
+  min-width: 78px;
+  height: 44px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.auth-password-toggle:hover {
+  background: var(--border-subtle);
+}
+.auth-error {
+  margin: 0;
+  color: var(--auth-error);
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.auth-error[hidden],
+.auth-help[hidden],
+.auth-feedback[hidden],
+.auth-success[hidden],
+#signup-form[hidden],
+#signup-switch[hidden],
+#signup-note[hidden] {
+  display: none;
+}
+.auth-help {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.auth-submit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 7px;
+  padding: 0 19px;
+  border: 1px solid var(--text-primary);
+  border-radius: var(--radius-pill);
+  background: var(--text-primary);
+  color: var(--surface);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: left;
+  transition:
+    transform var(--transition-ui),
+    box-shadow var(--transition-ui);
+}
+.auth-submit:hover {
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.12);
+  transform: translateY(-1px);
+}
+.auth-submit:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+.auth-submit span {
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1;
+}
+.auth-feedback {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--status-success-bg);
+  color: var(--text-primary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.auth-switch {
+  margin: 22px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.auth-switch a {
+  color: var(--text-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.auth-switch a:hover {
+  text-decoration-thickness: 2px;
+}
+.auth-demo-note {
+  max-width: 53ch;
+  margin: 22px 0 0;
+  padding-top: 17px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.auth-success {
+  padding-top: 10px;
+}
+.auth-success-mark {
+  position: relative;
+  display: block;
+  width: 38px;
+  height: 38px;
+  margin-bottom: 18px;
+  border-radius: 50%;
+  background: var(--status-success-bg);
+}
+.auth-success-mark:after {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 10px;
+  width: 9px;
+  height: 14px;
+  border: solid var(--text-primary);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.auth-success h2 {
+  margin: 0 0 10px;
+  font-size: 23px;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.auth-success p {
+  margin: 0 0 22px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.auth-success-link {
+  text-decoration: none;
+}
+.projectly-auth .auth-submit {
+  border-radius: var(--radius-control);
+}
+.projectly-auth .auth-submit:disabled {
+  opacity: 0.65;
+  cursor: wait;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .projectly-auth .auth-submit:hover,
+  .projectly-auth .auth-submit:active {
+    transform: none;
+  }
+}

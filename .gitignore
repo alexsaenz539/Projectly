@@ -3,6 +3,7 @@
 # Compiled output
 /dist
 /release
+/supabase/.temp/
 /tmp
 /out-tsc
 /bazel-out

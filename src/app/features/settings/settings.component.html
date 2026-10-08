@@ -88,7 +88,7 @@
       }}
     </p>
     <button class="btn" (click)="exportBackup()">Descargar respaldo JSON</button>
-    @if (store.auth.isDemo) {
+    @if (store.isSampleWorkspace()) {
       <button class="btn btn-danger mt-3" (click)="confirmReset.set(true)">
         Restablecer demostración
       </button>

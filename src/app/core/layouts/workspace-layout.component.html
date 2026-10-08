@@ -4,11 +4,16 @@
       <a class="brand" routerLink="/dashboard" aria-label="Projectly, inicio">
         <app-brand-logo [compact]="store.preferences().collapsed" />
       </a>
-      <span class="workspace"
-        >Espacio de trabajo <app-icon name="chevron-right" [size]="14"
-      /></span>
+      <a
+        class="workspace"
+        routerLink="/workspaces"
+        aria-label="Elegir espacio de trabajo"
+        [title]="store.activeWorkspace()?.name || 'Elegir espacio'"
+        ><span class="workspace-name">{{ store.activeWorkspace()?.name || 'Elegir espacio' }}</span>
+        <app-icon name="chevron-right" [size]="14"
+      /></a>
       <span class="demo-tag">{{
-        store.auth.isDemo ? 'Datos de demostración' : 'Mi espacio personal'
+        store.auth.isDemo ? 'Datos locales' : 'Sincronizado con mi cuenta'
       }}</span>
       <div class="top-spacer"></div>
       <div class="topbar-actions">
@@ -69,9 +74,7 @@
               : 'Espacio personal · Tus datos se sincronizan con tu cuenta.'
           }}
         </p>
-        @if (!store.auth.isDemo) {
-          <button class="btn btn-quiet mt-3" (click)="logout()">Cerrar sesión</button>
-        }
+        <button class="btn btn-quiet mt-3" (click)="logout()">Cerrar sesión</button>
       </div>
     </aside>
     <main class="main" id="main">

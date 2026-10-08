@@ -1,18 +1,37 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { workspaceGuard } from './core/guards/workspace.guard';
 
 export const routes: Routes = [
+  { path: '', pathMatch: 'full', redirectTo: 'login' },
+  { path: 'iniciar-sesion', redirectTo: 'login', pathMatch: 'full' },
+  { path: 'crear-usuario', redirectTo: 'register', pathMatch: 'full' },
+  { path: 'crear-espacio', redirectTo: 'workspaces', pathMatch: 'full' },
+  { path: 'espacios-de-trabajo', redirectTo: 'workspaces', pathMatch: 'full' },
   {
     path: 'login',
+    title: 'Iniciar sesión · Projectly',
     loadComponent: () => import('./core/auth/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'register',
+    title: 'Crear usuario · Projectly',
+    loadComponent: () => import('./core/auth/register.component').then((m) => m.RegisterComponent),
   },
   {
     path: '',
     canActivate: [authGuard],
+    canActivateChild: [authGuard, workspaceGuard],
     loadComponent: () =>
       import('./core/layouts/workspace-layout.component').then((m) => m.WorkspaceLayoutComponent),
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'mis-tareas' },
+      {
+        path: 'workspaces',
+        title: 'Espacios de trabajo · Projectly',
+        loadComponent: () =>
+          import('./features/workspaces/workspaces.component').then((m) => m.WorkspacesComponent),
+      },
       {
         path: 'dashboard',
         title: 'Dashboard · Projectly',

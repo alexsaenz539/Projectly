@@ -1,0 +1,164 @@
+.workspace-management {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 14px;
+  align-items: start;
+}
+.workspace-form {
+  display: grid;
+  gap: 17px;
+  max-width: 470px;
+}
+.workspace-field {
+  display: grid;
+  gap: 7px;
+}
+.workspace-field label {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.workspace-field input,
+.workspace-field textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+.workspace-field input {
+  min-height: 44px;
+  padding: 0 13px;
+}
+.workspace-field textarea {
+  min-height: 90px;
+  padding: 12px 13px;
+  line-height: 1.5;
+  resize: vertical;
+}
+.workspace-field input::placeholder,
+.workspace-field textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 1;
+}
+.workspace-field input:hover,
+.workspace-field textarea:hover {
+  border-color: var(--text-secondary);
+}
+.workspace-field input[aria-invalid='true'] {
+  border-color: oklch(0.45 0.14 25);
+}
+.dark .workspace-field input[aria-invalid='true'] {
+  border-color: oklch(0.79 0.09 25);
+}
+.workspace-help,
+.workspace-optional {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+.workspace-optional {
+  margin-left: 5px;
+}
+.workspace-error {
+  margin: 0;
+  color: oklch(0.45 0.14 25);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.dark .workspace-error {
+  color: oklch(0.79 0.09 25);
+}
+.workspace-error[hidden] {
+  display: none;
+}
+.workspace-submit {
+  justify-self: start;
+  margin-top: 2px;
+}
+.workspace-total {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.workspace-directory {
+  display: grid;
+  gap: 9px;
+  max-height: 560px;
+  overflow-y: auto;
+}
+.workspace-directory-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+.workspace-directory-item.is-active {
+  background: var(--surface-muted);
+  border-color: var(--text-secondary);
+}
+.workspace-directory-mark {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--status-neutral-bg);
+  font-size: 13px;
+  font-weight: 600;
+}
+.workspace-directory-copy {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 4px;
+}
+.workspace-directory-copy strong,
+.workspace-directory-copy span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.workspace-directory-copy strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+.workspace-directory-copy span {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+.workspace-open {
+  min-width: 63px;
+  padding: 0 12px;
+}
+@media (max-width: 1050px) {
+  .workspace-management {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 620px) {
+  .workspace-management .card-pad {
+    padding: 18px;
+  }
+  .workspace-directory-item {
+    gap: 9px;
+    padding: 10px;
+  }
+  .workspace-directory-mark {
+    width: 32px;
+    height: 32px;
+  }
+  .workspace-open {
+    min-width: 57px;
+    padding: 0 10px;
+  }
+}

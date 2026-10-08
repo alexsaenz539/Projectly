@@ -1,9 +1,14 @@
 <app-page-header
-  [title]="'Buen día, ' + store.myName().split(' ')[0]"
+  [title]="
+    store.myName() === 'Mi espacio' ? 'Buen día' : 'Buen día, ' + store.myName().split(' ')[0]
+  "
   eyebrow="Vista general"
   subtitle="Un resumen de los proyectos y tickets de tu espacio de trabajo."
-  ><button class="btn btn-primary" (click)="editor.open('ticket')">
-    <app-icon name="plus" />Crear ticket
+  ><button
+    class="btn btn-primary"
+    (click)="editor.open(store.projects().length ? 'ticket' : 'project')"
+  >
+    <app-icon name="plus" />{{ store.projects().length ? 'Crear ticket' : 'Crear proyecto' }}
   </button></app-page-header
 >
 <div class="grid metrics">

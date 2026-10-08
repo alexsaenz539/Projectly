@@ -170,3 +170,10 @@ progress {
     line-height: 22px;
   }
 }
+
+.workspace .workspace-name {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

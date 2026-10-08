@@ -1,0 +1,157 @@
+<app-page-header
+  title="Espacios de trabajo"
+  eyebrow="Organización"
+  subtitle="Cada espacio contiene sus propios proyectos. Los tickets y sprints quedan vinculados a esos proyectos."
+/>
+<div class="workspace-management">
+  <section class="card card-pad">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">Crear espacio</h2>
+        <p class="card-subtitle">Empieza con un nombre claro para tu equipo.</p>
+      </div>
+    </div>
+    <form
+      class="workspace-form"
+      (ngSubmit)="create()"
+      novalidate
+      [attr.aria-busy]="store.spaceBusy()"
+    >
+      <div class="workspace-field">
+        <label for="workspace-name">Nombre del espacio</label>
+        <input
+          id="workspace-name"
+          name="name"
+          type="text"
+          autocomplete="organization"
+          maxlength="64"
+          placeholder="Ej. Equipo de producto"
+          required
+          [ngModel]="name"
+          (ngModelChange)="nameChanged($event)"
+          [attr.aria-invalid]="!!errors.name"
+          aria-describedby="workspace-name-error"
+          [disabled]="store.spaceBusy()"
+        />
+        <p id="workspace-name-error" class="workspace-error" [hidden]="!errors.name">
+          {{ errors.name }}
+        </p>
+      </div>
+      <div class="workspace-field">
+        <label for="workspace-slug">Identificador</label>
+        <input
+          id="workspace-slug"
+          name="slug"
+          type="text"
+          spellcheck="false"
+          autocomplete="off"
+          maxlength="32"
+          placeholder="equipo-de-producto"
+          required
+          [(ngModel)]="slug"
+          (ngModelChange)="slugEdited = true; errors.slug = ''; feedback.set('')"
+          [attr.aria-invalid]="!!errors.slug"
+          aria-describedby="workspace-slug-help workspace-slug-error"
+          [disabled]="store.spaceBusy()"
+        />
+        <p id="workspace-slug-help" class="workspace-help">Letras minúsculas, números y guiones.</p>
+        <p id="workspace-slug-error" class="workspace-error" [hidden]="!errors.slug">
+          {{ errors.slug }}
+        </p>
+      </div>
+      <div class="workspace-field">
+        <label for="workspace-description"
+          >Descripción <span class="workspace-optional">Opcional</span></label
+        >
+        <textarea
+          id="workspace-description"
+          name="description"
+          maxlength="240"
+          rows="3"
+          placeholder="¿Para qué usarás este espacio?"
+          [(ngModel)]="description"
+          (ngModelChange)="errors.description = ''; feedback.set('')"
+          [attr.aria-invalid]="!!errors.description"
+          aria-describedby="workspace-description-error"
+          [disabled]="store.spaceBusy()"
+        ></textarea>
+        <p id="workspace-description-error" class="workspace-error" [hidden]="!errors.description">
+          {{ errors.description }}
+        </p>
+      </div>
+      <p class="workspace-help">
+        {{
+          store.auth.isDemo
+            ? 'Los proyectos, tickets y sprints de este espacio se guardarán por separado en este navegador.'
+            : 'Los proyectos, tickets y sprints se guardarán por separado en tu cuenta.'
+        }}
+      </p>
+      <button
+        class="btn btn-primary workspace-submit"
+        type="submit"
+        [disabled]="
+          store.spaceBusy() || store.busy() || store.directoryLoading() || !!store.directoryError()
+        "
+      >
+        <app-icon name="plus" />{{ store.spaceBusy() ? 'Creando espacio…' : 'Crear espacio' }}
+      </button>
+      <p class="workspace-error" role="alert" aria-live="polite" [hidden]="!feedback()">
+        {{ feedback() }}
+      </p>
+    </form>
+  </section>
+  <section class="card card-pad">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">Espacios disponibles</h2>
+        <p class="card-subtitle">Abre el espacio en el que quieres trabajar.</p>
+      </div>
+      <span class="workspace-total"
+        >{{ store.workspaceDirectory().length }}
+        {{ store.workspaceDirectory().length === 1 ? 'espacio' : 'espacios' }}</span
+      >
+    </div>
+    @if (store.directoryError()) {
+      <div class="notice" role="alert">
+        {{ store.directoryError() }}
+        <button class="btn mt-3" (click)="store.loadWorkspaces(true)">Reintentar</button>
+      </div>
+    } @else if (store.directoryLoading()) {
+      <p class="helper" role="status">Cargando espacios…</p>
+    } @else {
+      <div class="workspace-directory" aria-live="polite">
+        @for (space of store.workspaceSummaries(); track space.id) {
+          <article
+            class="workspace-directory-item"
+            [class.is-active]="space.id === store.activeWorkspaceId()"
+          >
+            <span class="workspace-directory-mark" aria-hidden="true">{{
+              space.name.charAt(0).toUpperCase()
+            }}</span>
+            <div class="workspace-directory-copy">
+              <strong [title]="space.name">{{ space.name }}</strong
+              ><span
+                >{{ space.slug }} · {{ space.projectCount }} proyectos ·
+                {{ space.ticketCount }} tickets</span
+              >
+            </div>
+            <button
+              class="btn workspace-open"
+              type="button"
+              (click)="open(space.id)"
+              [disabled]="store.spaceBusy() || store.busy()"
+              [attr.aria-label]="'Abrir ' + space.name"
+            >
+              {{ space.id === store.activeWorkspaceId() ? 'Actual' : 'Abrir' }}
+            </button>
+          </article>
+        } @empty {
+          <div class="empty">
+            <strong>Aún no hay espacios</strong>
+            <p>Crea el primero para empezar a organizar tus proyectos.</p>
+          </div>
+        }
+      </div>
+    }
+  </section>
+</div>

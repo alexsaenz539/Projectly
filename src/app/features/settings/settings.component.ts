@@ -18,7 +18,8 @@ export class SettingsComponent {
     );
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'projectly-respaldo.json';
+    link.download =
+      'projectly-' + (this.store.activeWorkspace()?.slug || 'espacio') + '-respaldo.json';
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
