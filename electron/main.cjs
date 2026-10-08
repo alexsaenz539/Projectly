@@ -115,7 +115,7 @@ else {
         await window.loadURL(entry);
         if (smoke) {
           const result = await window.webContents.executeJavaScript(
-            `new Promise((resolve,reject)=>{const end=Date.now()+15000;const poll=async()=>{if(document.querySelector('h1')&&window.projectOSDesktop){const state=await window.projectOSDesktop.getUpdateState();resolve({title:document.querySelector('h1').textContent,desktop:true,status:state.status,nodeUnavailable:typeof window.require==='undefined'});}else if(Date.now()>end)reject(new Error('La aplicación no cargó.'));else setTimeout(poll,50);};poll();})`,
+            `new Promise((resolve,reject)=>{const end=Date.now()+15000;const poll=async()=>{try{const shell=document.querySelector('.shell');const stylesLoaded=!!shell&&getComputedStyle(shell).display==='grid'&&getComputedStyle(document.body).margin==='0px';if(document.querySelector('h1')&&window.projectOSDesktop&&stylesLoaded){const state=await window.projectOSDesktop.getUpdateState();resolve({title:document.querySelector('h1').textContent,desktop:true,stylesLoaded,status:state.status,nodeUnavailable:typeof window.require==='undefined'});}else if(Date.now()>end)reject(new Error('La aplicación o sus estilos no cargaron.'));else setTimeout(poll,50);}catch(error){reject(error);}};poll();})`,
           );
           console.log(JSON.stringify({ smoke: result }));
           app.quit();

@@ -10,9 +10,8 @@ module.exports = {
     target: [{ target: 'nsis', arch: ['x64'] }],
   },
   nsis: {
-    oneClick: false,
+    oneClick: true,
     perMachine: false,
-    allowToChangeInstallationDirectory: true,
     createDesktopShortcut: true,
     deleteAppDataOnUninstall: false,
   },
