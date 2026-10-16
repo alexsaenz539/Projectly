@@ -33,6 +33,7 @@ function compile(path, dependencies = {}, globals = {}) {
 class MemoryStorage {
   values = new Map();
   failKey = '';
+  failRemoveKey = '';
   getItem(key) {
     return this.values.get(key) ?? null;
   }
@@ -41,6 +42,7 @@ class MemoryStorage {
     this.values.set(key, String(value));
   }
   removeItem(key) {
+    if (key === this.failRemoveKey) throw new Error('Storage removal failed');
     this.values.delete(key);
   }
 }
@@ -208,6 +210,11 @@ function fakeClient(run) {
           query.payload = payload;
           return builder;
         },
+        update(payload) {
+          query.operation = 'update';
+          query.payload = payload;
+          return builder;
+        },
         delete() {
           query.operation = 'delete';
           return builder;
@@ -325,4 +332,167 @@ test('late responses from the previous space never replace current data', async 
   await Promise.resolve();
   assert.equal(store.activeWorkspaceId(), 'b');
   assert.equal(store.projects()[0].id, 'current-space-project');
+});
+
+test('local workspace editing preserves IDs, contents and selection across reloads', () => {
+  const storage = new MemoryStorage(),
+    repo = new local.LocalWorkspaces(storage);
+  const first = repo.create('Producto', 'producto', '');
+  const second = repo.create('Operaciones', 'operaciones', '');
+  const data = empty();
+  data.projects.push({ id: 'project', name: 'Conservar' });
+  repo.write(first.id, data);
+  repo.update(first.id, 'Producto editado', 'producto', 'Descripción');
+  assert.equal(repo.selected(), second.id);
+  const reloaded = new local.LocalWorkspaces(storage);
+  assert.equal(reloaded.records().find((space) => space.id === first.id).name, 'Producto editado');
+  assert.equal(reloaded.read(first.id).projects[0].id, 'project');
+  assert.throws(() => repo.update(first.id, 'Duplicado', 'operaciones', ''), /ya está en uso/);
+  assert.throws(() => repo.update('missing', 'Nuevo', 'nuevo', ''), /no está disponible/);
+  assert.throws(() => repo.update('demo', 'Nuevo', 'nuevo', ''), /protegido/);
+});
+
+test('local deletion removes only the target data and selects a fallback for the active space', () => {
+  const storage = new MemoryStorage(),
+    repo = new local.LocalWorkspaces(storage);
+  const first = repo.create('Producto', 'producto', '');
+  const second = repo.create('Operaciones', 'operaciones', '');
+  repo.remove(first.id);
+  assert.equal(repo.selected(), second.id);
+  assert.equal(storage.getItem('projectly-workspace-' + first.id + '-v1'), null);
+  repo.remove(second.id);
+  assert.equal(repo.selected(), 'demo');
+  assert.equal(repo.records().length, 1);
+  assert.equal(new local.LocalWorkspaces(storage).selected(), 'demo');
+  assert.throws(() => repo.remove('demo'), /protegido/);
+});
+
+test('failed local deletion rolls back registry, selection and workspace contents', () => {
+  const storage = new MemoryStorage(),
+    repo = new local.LocalWorkspaces(storage);
+  const space = repo.create('Producto', 'producto', '');
+  const before = JSON.stringify([...storage.values]);
+  storage.failRemoveKey = 'projectly-workspace-' + space.id + '-v1';
+  assert.throws(() => repo.remove(space.id), /removal failed/);
+  assert.equal(JSON.stringify([...storage.values]), before);
+});
+
+test('store editing keeps active data and deletion restores the fallback without deleted data', async () => {
+  const store = makeStore(new MemoryStorage());
+  const space = await store.createWorkspace('Producto', 'producto', '');
+  store.data.set({ ...empty(), projects: [{ id: 'project', name: 'Conservar' }] });
+  await store.updateWorkspace(
+    space.id,
+    'Producto editado',
+    'producto-editado',
+    'Nueva descripción',
+  );
+  assert.equal(store.activeWorkspace().name, 'Producto editado');
+  assert.equal(store.projects()[0].id, 'project');
+  await store.removeWorkspace(space.id);
+  assert.equal(store.activeWorkspaceId(), 'demo');
+  assert.ok(!store.projects().some((project) => project.id === 'project'));
+  store.busy.set(true);
+  await assert.rejects(store.updateWorkspace('demo', 'Nombre', 'nombre', ''), /operación actual/);
+  await assert.rejects(store.removeWorkspace('demo'), /operación actual/);
+});
+
+test('cloud workspace updates and deletes are owner-filtered and the last deletion clears selection', async () => {
+  const requests = [],
+    storage = new MemoryStorage();
+  const space = {
+    id: 'workspace-a',
+    name: 'Producto',
+    slug: 'producto',
+    description: '',
+    created_at: '',
+  };
+  const store = makeStore(
+    storage,
+    fakeClient(async (query) => {
+      requests.push(query);
+      if (query.table !== 'workspaces') return { data: [], error: null };
+      if (query.operation === 'update')
+        return { data: { ...space, ...query.payload }, error: null };
+      if (query.operation === 'delete') return { data: { id: space.id }, error: null };
+      return { data: [space], error: null };
+    }),
+  );
+  await store.loadWorkspaces();
+  await store.updateWorkspace(space.id, 'Nuevo nombre', 'producto', 'Descripción');
+  assert.equal(store.activeWorkspace().name, 'Nuevo nombre');
+  await store.removeWorkspace(space.id);
+  for (const query of requests.filter((query) => ['update', 'delete'].includes(query.operation))) {
+    assert.equal(query.filters.id, space.id);
+    assert.equal(query.filters.user_id, 'account-a');
+  }
+  assert.equal(store.activeWorkspaceId(), null);
+  assert.equal(store.hasWorkspace(), false);
+  assert.equal(store.workspaceDirectory().length, 0);
+  assert.equal(store.projects().length, 0);
+  assert.equal(storage.getItem('projectly-active-workspace-account-a'), null);
+});
+
+test('rejected cloud mutations preserve directory, data and selection', async () => {
+  const space = {
+    id: 'workspace-a',
+    name: 'Producto',
+    slug: 'producto',
+    description: '',
+    created_at: '',
+  };
+  const store = makeStore(
+    new MemoryStorage(),
+    fakeClient(async (query) => {
+      if (query.table !== 'workspaces') return { data: [], error: null };
+      if (query.operation !== 'select') return { data: null, error: { message: 'Sin permiso' } };
+      return { data: [space], error: null };
+    }),
+  );
+  await store.loadWorkspaces();
+  await assert.rejects(
+    store.updateWorkspace(space.id, 'Otro nombre', 'otro-nombre', ''),
+    /Sin permiso/,
+  );
+  await assert.rejects(store.removeWorkspace(space.id), /Sin permiso/);
+  assert.equal(store.activeWorkspace().name, 'Producto');
+  assert.equal(store.activeWorkspaceId(), space.id);
+  assert.equal(store.spaceBusy(), false);
+});
+
+test('late workspace mutation responses cannot modify the next authenticated session', async () => {
+  for (const operation of ['update', 'delete']) {
+    let release;
+    const space = {
+      id: 'workspace-a',
+      name: 'Producto',
+      slug: 'producto',
+      description: '',
+      created_at: '',
+    };
+    const store = makeStore(
+      new MemoryStorage(),
+      fakeClient((query) => {
+        if (query.table !== 'workspaces') return Promise.resolve({ data: [], error: null });
+        if (query.operation === operation)
+          return new Promise((resolve) => {
+            release = resolve;
+          });
+        return Promise.resolve({ data: [space], error: null });
+      }),
+    );
+    await store.loadWorkspaces();
+    const pending =
+      operation === 'update'
+        ? store.updateWorkspace(space.id, 'Actualizado', 'producto', '')
+        : store.removeWorkspace(space.id);
+    store.authEpoch++;
+    store.auth.user = () => ({ id: 'account-b' });
+    store.workspaceDirectory.set([{ ...space, id: 'workspace-b', name: 'Otra cuenta' }]);
+    store.activeWorkspaceId.set('workspace-b');
+    release({ data: { ...space, name: 'Actualizado' }, error: null });
+    await assert.rejects(pending, /sesión ha cambiado/);
+    assert.equal(store.activeWorkspaceId(), 'workspace-b');
+    assert.equal(store.activeWorkspace().name, 'Otra cuenta');
+  }
 });

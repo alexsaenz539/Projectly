@@ -48,6 +48,12 @@ test('PostgreSQL: migration preserves historical data and isolates workspace rel
         'utf8',
       ),
     );
+    await db.exec(
+      await readFile(
+        new URL('../supabase/migrations/20261016220000_workspace_management.sql', import.meta.url),
+        'utf8',
+      ),
+    );
     await db.exec('set role authenticated;');
     let first, second, p2;
     await t.test(
@@ -183,9 +189,55 @@ test('PostgreSQL: migration preserves historical data and isolates workspace rel
         );
       },
     );
+    await t.test('workspace editing keeps the IDs and business records intact', async () => {
+      await db.exec(`select set_config('test.user_id','${user}',false);`);
+      const result = await db.query(
+        "update workspaces set name='Equipo actualizado',slug='equipo-actualizado',description='Nueva descripción' where id=$1 returning id",
+        [first],
+      );
+      assert.equal(result.rows[0].id, first);
+      assert.equal(
+        (await db.query('select id from tickets where workspace_id=$1', [first])).rows[0].id,
+        ticket,
+      );
+    });
+    await t.test('another account cannot delete spaces or their contents', async () => {
+      await db.exec(`select set_config('test.user_id','${other}',false);`);
+      assert.equal(
+        (await db.query('delete from workspaces where id=$1 returning id', [first])).rows.length,
+        0,
+      );
+      await db.exec(`select set_config('test.user_id','${user}',false);`);
+      assert.equal(
+        (await db.query('select id from workspaces where id=$1', [first])).rows.length,
+        1,
+      );
+    });
+    await t.test(
+      'deleting a populated space cascades atomically and preserves the sibling space',
+      async () => {
+        await db.query('delete from workspaces where id=$1', [first]);
+        for (const table of ['members', 'projects', 'sprints', 'tickets', 'notifications']) {
+          assert.equal(
+            (await db.query(`select id from ${table} where workspace_id=$1`, [first])).rows.length,
+            0,
+          );
+        }
+        assert.equal((await db.query('select id from projects where id=$1', [p2])).rows.length, 1);
+        assert.equal(
+          (await db.query('select id from tickets where workspace_id=$1', [second])).rows.length,
+          1,
+        );
+        await db.query('delete from workspaces where id=$1', [second]);
+        assert.equal((await db.query('select id from workspaces')).rows.length, 0);
+        await db.exec(`select set_config('test.user_id','${other}',false);`);
+        assert.equal((await db.query('select id from workspaces')).rows.length, 1);
+      },
+    );
     await t.test('anonymous workspace access is revoked', async () => {
       await db.exec('reset role; set role anon;');
       await assert.rejects(db.query('select * from workspaces'), /permission denied/);
+      await assert.rejects(db.query('delete from workspaces'), /permission denied/);
     });
   } finally {
     await db.close();

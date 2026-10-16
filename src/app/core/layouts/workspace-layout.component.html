@@ -4,14 +4,7 @@
       <a class="brand" routerLink="/dashboard" aria-label="Projectly, inicio">
         <app-brand-logo [compact]="store.preferences().collapsed" />
       </a>
-      <a
-        class="workspace"
-        routerLink="/workspaces"
-        aria-label="Elegir espacio de trabajo"
-        [title]="store.activeWorkspace()?.name || 'Elegir espacio'"
-        ><span class="workspace-name">{{ store.activeWorkspace()?.name || 'Elegir espacio' }}</span>
-        <app-icon name="chevron-right" [size]="14"
-      /></a>
+      <app-workspace-switcher />
       <span class="demo-tag">{{
         store.auth.isDemo ? 'Datos locales' : 'Sincronizado con mi cuenta'
       }}</span>

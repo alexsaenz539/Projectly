@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { FormControlsModule } from '../../shared/components/form-controls.module';
 import { ActivatedRoute } from '@angular/router';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { EditorService } from '../../core/services/editor.service';
@@ -8,7 +9,7 @@ import { PageHeaderComponent } from '../../shared/components/page-header.compone
 import { IconComponent } from '../../shared/components/icon.component';
 @Component({
   selector: 'app-projects',
-  imports: [FormsModule, PageHeaderComponent, IconComponent],
+  imports: [FormsModule, PageHeaderComponent, IconComponent, FormControlsModule],
   templateUrl: './projects.component.html',
 })
 export class ProjectsComponent {

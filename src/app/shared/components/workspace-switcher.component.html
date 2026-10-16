@@ -1,0 +1,60 @@
+<button
+  type="button"
+  class="workspace"
+  [cdkMenuTriggerFor]="menu"
+  [disabled]="store.busy() || store.spaceBusy()"
+  aria-label="Cambiar de espacio o abrir un proyecto"
+  [title]="store.activeWorkspace()?.name || 'Elegir espacio'"
+>
+  <span class="workspace-name">{{ store.activeWorkspace()?.name || 'Elegir espacio' }}</span>
+  <app-icon name="chevrons-up-down" [size]="14" />
+</button>
+<ng-template #menu>
+  <div cdkMenu class="workspace-menu" aria-label="Espacios y proyectos">
+    <p class="workspace-menu-heading">Espacios de trabajo</p>
+    <div class="workspace-menu-list">
+      @for (space of store.workspaceDirectory(); track space.id) {
+        <button
+          type="button"
+          cdkMenuItem
+          class="workspace-option"
+          [class.current]="space.id === store.activeWorkspaceId()"
+          (cdkMenuItemTriggered)="selectWorkspace(space.id)"
+        >
+          <app-icon name="layers" [size]="16" />
+          <span>{{ space.name }}</span>
+          @if (space.id === store.activeWorkspaceId()) {
+            <app-icon name="check" [size]="15" />
+          }
+        </button>
+      } @empty {
+        <p class="workspace-menu-empty">Todavía no tienes espacios.</p>
+      }
+    </div>
+    @if (store.hasWorkspace()) {
+      <p class="workspace-menu-heading workspace-menu-divider">Proyectos del espacio</p>
+      <div class="workspace-menu-list">
+        @for (project of store.projects(); track project.id) {
+          @if (project.status !== 'Archivado') {
+            <a
+              cdkMenuItem
+              class="workspace-option"
+              routerLink="/projects"
+              [queryParams]="{ project: project.id }"
+            >
+              <app-icon name="folder" [size]="16" /><span>{{ project.name }}</span>
+              <small>{{ project.key }}</small>
+            </a>
+          }
+        }
+        <a cdkMenuItem class="workspace-option workspace-all" routerLink="/projects">
+          <app-icon name="folders" [size]="16" /><span>Ver todos los proyectos</span
+          ><app-icon name="arrow-up-right" [size]="14" />
+        </a>
+      </div>
+    }
+    <a cdkMenuItem class="workspace-option workspace-menu-divider" routerLink="/workspaces">
+      <app-icon name="layout-grid" [size]="16" /><span>Administrar espacios</span>
+    </a>
+  </div>
+</ng-template>

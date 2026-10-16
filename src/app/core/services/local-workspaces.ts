@@ -108,6 +108,41 @@ export class LocalWorkspaces {
   write(id: string, data: Workspace) {
     this.storage.setItem(this.key(id), JSON.stringify(data));
   }
+  update(id: string, name: string, slug: string, description: string): WorkspaceRecord {
+    const records = this.records();
+    const existing = records.find((record) => record.id === id);
+    if (!existing) throw new Error('El espacio ya no está disponible.');
+    if (id === DEMO_WORKSPACE_ID) throw new Error('El espacio de demostración está protegido.');
+    const failure = Object.values(workspaceErrors(name, slug, description, records, id)).find(
+      Boolean,
+    );
+    if (failure) throw new Error(failure);
+    const updated = { ...existing, name: name.trim(), slug, description: description.trim() };
+    this.apply([
+      [
+        REGISTRY,
+        JSON.stringify(
+          records
+            .filter((record) => record.id !== DEMO_WORKSPACE_ID)
+            .map((record) => (record.id === id ? updated : record)),
+        ),
+      ],
+    ]);
+    return updated;
+  }
+  remove(id: string): void {
+    const records = this.records();
+    if (!records.some((record) => record.id === id))
+      throw new Error('El espacio ya no está disponible.');
+    if (id === DEMO_WORKSPACE_ID) throw new Error('El espacio de demostración está protegido.');
+    const remaining = records.filter((record) => record.id !== id);
+    const writes: [string, string | null][] = [
+      [REGISTRY, JSON.stringify(remaining.filter((record) => record.id !== DEMO_WORKSPACE_ID))],
+    ];
+    if (this.selected() === id) writes.push([ACTIVE, remaining[0].id]);
+    writes.push([this.key(id), null]);
+    this.apply(writes);
+  }
   create(name: string, slug: string, description: string): WorkspaceRecord {
     const records = this.records();
     const errors = workspaceErrors(name, slug, description, records);
@@ -122,7 +157,7 @@ export class LocalWorkspaces {
       projectCount: 0,
       ticketCount: 0,
     };
-    const writes = [
+    const writes: [string, string | null][] = [
       [this.key(record.id), JSON.stringify(EMPTY_WORKSPACE)],
       [
         REGISTRY,
@@ -130,20 +165,26 @@ export class LocalWorkspaces {
       ],
       [ACTIVE, record.id],
     ];
-    const previous = writes.map(([key]) => [key, this.storage.getItem(key)]);
+    this.apply(writes);
+    return record;
+  }
+  private apply(writes: [string, string | null][]): void {
+    const previous = writes.map(([key]) => [key, this.storage.getItem(key)] as const);
     try {
-      for (const [key, value] of writes) this.storage.setItem(key, value);
+      for (const [key, value] of writes) {
+        if (value === null) this.storage.removeItem(key);
+        else this.storage.setItem(key, value);
+      }
     } catch (error) {
       for (const [key, value] of previous) {
         try {
-          if (value === null) this.storage.removeItem(key!);
-          else this.storage.setItem(key!, value!);
+          if (value === null) this.storage.removeItem(key);
+          else this.storage.setItem(key, value);
         } catch {
-          /* Keep the original storage error; do not report creation as successful. */
+          /* Keep the original error; do not report a failed operation as successful. */
         }
       }
       throw error;
     }
-    return record;
   }
 }

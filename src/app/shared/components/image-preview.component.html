@@ -1,0 +1,7 @@
+<section class="image-preview" aria-label="Vista ampliada de la captura">
+  <header>
+    <strong>{{ image.name }}</strong
+    ><button type="button" class="btn" (click)="ref.close()">Cerrar</button>
+  </header>
+  <img [src]="image.url" [alt]="image.name" />
+</section>

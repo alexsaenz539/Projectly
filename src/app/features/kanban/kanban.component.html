@@ -1,7 +1,7 @@
 <app-page-header
   title="Tablero Kanban"
   eyebrow="Flujo de trabajo"
-  subtitle="Arrastra los tickets entre columnas o cambia el estado desde su tarjeta."
+  subtitle="Arrastra los tickets entre columnas para cambiar su estado."
   ><button class="btn btn-primary" (click)="editor.open('ticket')">
     <app-icon name="plus" />Crear ticket
   </button></app-page-header
@@ -28,7 +28,7 @@
             </button>
           </div>
           <strong
-            ><button class="card-link" (click)="editor.open('ticket', t)">
+            ><button class="card-link" (click)="editor.viewTicket(t)" [attr.aria-label]="'Ver detalle de ' + t.key + ': ' + t.title">
               {{ t.title }}
             </button></strong
           ><span class="subline"
@@ -36,17 +36,6 @@
             {{ store.member(t.assignee)?.name || 'Sin asignar' }}</span
           >
           <div class="mt-3"><app-badge [value]="t.priority" /></div>
-          <select
-            class="select"
-            [attr.aria-label]="'Cambiar estado de ' + t.key"
-            [ngModel]="t.status"
-            [disabled]="store.busy()"
-            (ngModelChange)="store.moveTicket(t, $event)"
-          >
-            @for (s of statuses; track s) {
-              <option>{{ s }}</option>
-            }
-          </select>
         </article>
       }
       @if (!tickets(status).length) {

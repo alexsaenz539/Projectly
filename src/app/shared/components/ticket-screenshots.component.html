@@ -1,0 +1,103 @@
+<section class="screenshots" aria-label="Capturas del ticket">
+  <div class="screenshots-heading">
+    <strong>Capturas</strong><span>{{ count() }}{{ readOnly() ? '' : ' / ' + limit }}</span>
+  </div>
+  @if (!readOnly()) {
+  <div class="screenshots-dropzone" (dragover)="$event.preventDefault()" (drop)="drop($event)">
+    <input
+      #fileInput
+      type="file"
+      multiple
+      accept="image/png,image/jpeg,image/webp"
+      class="screenshots-file"
+      aria-label="Seleccionar capturas"
+      (change)="selected($event)"
+      [disabled]="busy() || loading() || processing() || loadFailed() || count() >= limit"
+    />
+    <button
+      type="button"
+      class="btn"
+      [disabled]="busy() || loading() || processing() || loadFailed() || count() >= limit"
+      (click)="fileInput.click()"
+    >
+      Adjuntar capturas
+    </button>
+    <p>Arrastra imágenes aquí o pega una captura con Ctrl+V.</p>
+    <span>PNG, JPG o WebP · Máximo 5 MB por imagen</span>
+  </div>
+  }
+  @if (loading() || processing()) {
+    <p class="helper" role="status">
+      {{ loading() ? 'Cargando capturas…' : 'Validando imágenes…' }}
+    </p>
+  }
+  @if (visible().length || pending().length) {
+    <div class="screenshots-grid">
+      @for (image of visible(); track image.path) {
+        <figure>
+          <button
+            type="button"
+            class="screenshot-preview"
+            (click)="preview(image)"
+            [attr.aria-label]="'Ampliar ' + image.name"
+          >
+            <img [src]="image.url" [alt]="image.name" loading="lazy" />
+          </button>
+          <figcaption [title]="image.name">{{ image.name }}</figcaption>
+          @if (!readOnly()) {
+          <button
+            type="button"
+            class="screenshot-remove"
+            [disabled]="busy()"
+            (click)="removeSaved(image)"
+            [attr.aria-label]="'Quitar ' + image.name"
+          >
+            Quitar
+          </button>
+          }
+        </figure>
+      }
+      @for (image of readOnly() ? [] : pending(); track image.id) {
+        <figure>
+          <button
+            type="button"
+            class="screenshot-preview"
+            (click)="preview({ path: image.id, name: image.file.name, url: image.url })"
+            [attr.aria-label]="'Ampliar ' + image.file.name"
+          >
+            <img [src]="image.url" [alt]="image.file.name" />
+          </button>
+          <figcaption [title]="image.file.name">{{ image.file.name }}</figcaption>
+          <span class="screenshot-pending">Pendiente de guardar</span>
+          <button
+            type="button"
+            class="screenshot-remove"
+            [disabled]="busy()"
+            (click)="removePending(image)"
+            [attr.aria-label]="'Quitar ' + image.file.name"
+          >
+            Quitar
+          </button>
+        </figure>
+      }
+    </div>
+  }
+  @if (!readOnly() && removed().size) {
+    <p class="helper">
+      {{ removed().size }} captura(s) se eliminarán al guardar.
+      <button type="button" class="text-link" [disabled]="busy()" (click)="undo()">Deshacer</button>
+    </p>
+  }
+  @if (error()) {
+    <p class="form-error" role="alert">{{ error() }}</p>
+  }
+  @if (loadFailed()) {
+    <button type="button" class="btn" [disabled]="busy()" (click)="load()">Reintentar carga</button>
+  }
+  @if (readOnly()) {
+    @if (!loading() && !loadFailed() && !visible().length) { <p class="helper">Este ticket no tiene capturas.</p> }
+    @if (visible().length) { <p class="helper">Selecciona una captura para verla ampliada.</p> }
+  } @else {
+    <p class="helper">Las capturas se guardan al crear o guardar el ticket.</p>
+  }
+</section>

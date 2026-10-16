@@ -1,0 +1,32 @@
+<section
+  class="dialog"
+  aria-labelledby="confirm-dialog-title"
+  aria-describedby="confirm-dialog-message"
+>
+  <div class="dialog-head">
+    <h2 id="confirm-dialog-title">{{ data.title }}</h2>
+  </div>
+  <p id="confirm-dialog-message" class="helper">{{ data.message }}</p>
+  <form class="form-grid" (ngSubmit)="confirm()">
+    <div class="form-row">
+      <label for="confirm-dialog-input">Escribe «{{ data.confirmationText }}» para confirmar</label>
+      <input
+        id="confirm-dialog-input"
+        name="confirmation"
+        autocomplete="off"
+        spellcheck="false"
+        [(ngModel)]="confirmation"
+      />
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn" (click)="ref.close(false)">Cancelar</button>
+      <button
+        type="submit"
+        class="btn btn-danger"
+        [disabled]="confirmation !== data.confirmationText"
+      >
+        {{ data.confirmLabel }}
+      </button>
+    </div>
+  </form>
+</section>

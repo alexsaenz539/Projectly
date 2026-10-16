@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { FormControlsModule } from '../../shared/components/form-controls.module';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { DesktopUpdateService } from '../../core/services/desktop-update.service';
 @Component({
   selector: 'app-settings',
-  imports: [FormsModule, PageHeaderComponent],
+  imports: [FormsModule, PageHeaderComponent, FormControlsModule],
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent {

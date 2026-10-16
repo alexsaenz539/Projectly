@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { EditorService } from '../../core/services/editor.service';
@@ -9,7 +8,12 @@ import { IconComponent } from '../../shared/components/icon.component';
 import { BadgeComponent } from '../../shared/components/badge.component';
 @Component({
   selector: 'app-kanban',
-  imports: [FormsModule, DragDropModule, PageHeaderComponent, IconComponent, BadgeComponent],
+  imports: [
+    DragDropModule,
+    PageHeaderComponent,
+    IconComponent,
+    BadgeComponent,
+  ],
   templateUrl: './kanban.component.html',
 })
 export class KanbanComponent {

@@ -51,6 +51,12 @@ export const routes: Routes = [
           import('./features/tickets/tickets.component').then((m) => m.TicketsComponent),
       },
       {
+        path: 'tickets/:id',
+        title: 'Detalle del ticket · Projectly',
+        loadComponent: () =>
+          import('./features/tickets/ticket-page.component').then((m) => m.TicketPageComponent),
+      },
+      {
         path: 'mis-tareas',
         title: 'Mis tareas · Projectly',
         loadComponent: () =>

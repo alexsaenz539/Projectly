@@ -7,13 +7,19 @@
   <section class="card card-pad">
     <div class="card-header">
       <div>
-        <h2 class="card-title">Crear espacio</h2>
-        <p class="card-subtitle">Empieza con un nombre claro para tu equipo.</p>
+        <h2 class="card-title">{{ editingId() ? 'Editar espacio' : 'Crear espacio' }}</h2>
+        <p class="card-subtitle">
+          {{
+            editingId()
+              ? 'Actualiza sus datos sin cambiar los proyectos ni los tickets.'
+              : 'Empieza con un nombre claro para tu equipo.'
+          }}
+        </p>
       </div>
     </div>
     <form
       class="workspace-form"
-      (ngSubmit)="create()"
+      (ngSubmit)="save()"
       novalidate
       [attr.aria-busy]="store.spaceBusy()"
     >
@@ -86,15 +92,28 @@
             : 'Los proyectos, tickets y sprints se guardarán por separado en tu cuenta.'
         }}
       </p>
-      <button
-        class="btn btn-primary workspace-submit"
-        type="submit"
-        [disabled]="
-          store.spaceBusy() || store.busy() || store.directoryLoading() || !!store.directoryError()
-        "
-      >
-        <app-icon name="plus" />{{ store.spaceBusy() ? 'Creando espacio…' : 'Crear espacio' }}
-      </button>
+      <div class="workspace-form-actions">
+        @if (editingId()) {
+          <button type="button" class="btn" [disabled]="store.spaceBusy()" (click)="cancelEdit()">
+            Cancelar
+          </button>
+        }
+        <button
+          class="btn btn-primary workspace-submit"
+          type="submit"
+          [disabled]="
+            store.spaceBusy() ||
+            store.busy() ||
+            store.directoryLoading() ||
+            !!store.directoryError()
+          "
+        >
+          @if (!editingId()) {
+            <app-icon name="plus" />
+          }
+          {{ store.spaceBusy() ? 'Guardando…' : editingId() ? 'Guardar cambios' : 'Crear espacio' }}
+        </button>
+      </div>
       <p class="workspace-error" role="alert" aria-live="polite" [hidden]="!feedback()">
         {{ feedback() }}
       </p>
@@ -111,6 +130,9 @@
         {{ store.workspaceDirectory().length === 1 ? 'espacio' : 'espacios' }}</span
       >
     </div>
+    @if (directoryFeedback()) {
+      <p class="workspace-error mb-3" role="alert">{{ directoryFeedback() }}</p>
+    }
     @if (store.directoryError()) {
       <div class="notice" role="alert">
         {{ store.directoryError() }}
@@ -135,15 +157,53 @@
                 {{ space.ticketCount }} tickets</span
               >
             </div>
-            <button
-              class="btn workspace-open"
-              type="button"
-              (click)="open(space.id)"
-              [disabled]="store.spaceBusy() || store.busy()"
-              [attr.aria-label]="'Abrir ' + space.name"
-            >
-              {{ space.id === store.activeWorkspaceId() ? 'Actual' : 'Abrir' }}
-            </button>
+            <div class="workspace-item-actions">
+              <button
+                type="button"
+                class="btn btn-quiet"
+                (click)="edit(space)"
+                [disabled]="
+                  store.spaceBusy() ||
+                  store.busy() ||
+                  (store.auth.isDemo && space.id === demoWorkspaceId)
+                "
+                [attr.aria-label]="'Editar ' + space.name"
+                [title]="
+                  store.auth.isDemo && space.id === demoWorkspaceId
+                    ? 'El espacio de demostración está protegido'
+                    : 'Editar espacio'
+                "
+              >
+                Editar
+              </button>
+              <button
+                type="button"
+                class="btn btn-quiet btn-danger"
+                (click)="remove(space)"
+                [disabled]="
+                  store.spaceBusy() ||
+                  store.busy() ||
+                  (store.auth.isDemo && space.id === demoWorkspaceId)
+                "
+                [attr.aria-label]="'Eliminar ' + space.name"
+                [title]="
+                  store.auth.isDemo && space.id === demoWorkspaceId
+                    ? 'El espacio de demostración está protegido'
+                    : 'Eliminar espacio'
+                "
+              >
+                Eliminar
+              </button>
+              <button
+                class="btn workspace-open"
+                type="button"
+                (click)="open(space.id)"
+                [disabled]="store.spaceBusy() || store.busy()"
+                [attr.aria-label]="'Abrir ' + space.name"
+              >
+                {{ space.id === store.activeWorkspaceId() ? 'Actual' : 'Abrir' }}
+              </button>
+            </div>
           </article>
         } @empty {
           <div class="empty">

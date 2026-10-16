@@ -24,10 +24,10 @@ La compilación lista para publicar está en `dist/project-os/browser`. Configur
 ## Funciones
 
 - Acceso y registro: validaciones por campo, confirmación de contraseña, mostrar/ocultar contraseña y confirmación de correo con Supabase.
-- Espacios: crear espacios privados con nombre, identificador único y descripción; abrirlos desde el directorio o desde el encabezado. Los proyectos, tickets, sprints, miembros y notificaciones se guardan por separado.
+- Espacios: crear, editar y eliminar espacios privados con nombre, identificador único y descripción; abrirlos desde el directorio o desde el encabezado. Eliminar pide escribir el nombre y borra también sus proyectos, tickets, sprints, miembros y notificaciones. El espacio local de demostración está protegido.
 - Dashboard: indicadores, ApexCharts, progreso por proyecto y tickets recientes.
 - Proyectos: crear, editar y archivar; claves únicas dentro del espacio.
-- Tickets: crear, editar, eliminar con confirmación, buscar y filtrar.
+- Tickets: crear, editar, eliminar con confirmación, buscar y filtrar; adjuntar capturas con miniaturas y vista ampliada.
 - Mis tareas: Todas, Hoy, Próximas y Atrasadas; completar tickets.
 - Kanban: arrastre con Angular CDK y selector de estado accesible.
 - Sprints: objetivos, fechas, asignación de tickets, inicio y cierre.
@@ -41,7 +41,7 @@ La compilación lista para publicar está en `dist/project-os/browser`. Configur
 ## Conectar Supabase
 
 1. Crea o selecciona un proyecto Supabase.
-2. En una base nueva, ejecuta **una vez** `supabase/schema.sql` desde el SQL Editor y después `supabase/migrations/20261008222620_workspace_isolation.sql`. En una base que ya use el esquema anterior, ejecuta únicamente esa migración una vez: conserva los datos existentes dentro de **Mi espacio personal**. Nunca vuelvas a ejecutar el esquema inicial sobre tablas existentes.
+2. En una base nueva, ejecuta **una vez** `supabase/schema.sql` desde el SQL Editor y después las migraciones `supabase/migrations/20261008222620_workspace_isolation.sql`, `supabase/migrations/20261016220000_workspace_management.sql` y `supabase/migrations/20261016230000_ticket_screenshots.sql`, en ese orden. En una base existente, ejecuta solo las migraciones pendientes: conservan los datos, habilitan el borrado de espacios y crean el bucket privado de capturas. Nunca vuelvas a ejecutar el esquema inicial sobre tablas existentes.
 3. Copia la URL y la clave **publishable** a `src/environments/environment.ts`. Es configuración pública. Nunca uses claves secretas ni `service_role`.
 4. Activa Email/Password en Authentication y configura las URLs de tu aplicación. Si requiere confirmación de correo, confirma antes de iniciar sesión.
 5. Reinicia la aplicación. Ahora solicita inicio de sesión y carga el último espacio privado de esa cuenta. Las cuentas nuevas deben crear su primer espacio; las rutas de trabajo las llevan al directorio si todavía no tienen uno. Crea miembros y proyectos antes de crear tickets. Los datos de demostración no se suben automáticamente.
@@ -52,6 +52,14 @@ Cada cuenta puede crear varios **espacios privados**. RLS separa las cuentas por
 Realtime vuelve a cargar los datos ante cambios de PostgreSQL. Las operaciones muestran errores y no confirman cambios rechazados por el servidor. Apariencia y perfil seleccionado se guardan localmente; los datos de negocio se guardan en Supabase.
 
 `npm test` ejecuta el esquema real en PostgreSQL embebido (PGlite) con Auth simulado y verifica RLS, aislamiento de cuentas, fechas, claves, relaciones y notificaciones. También prueba validación de formularios, acceso protegido, cierre de sesión y respuestas de la API Auth con dependencias controladas. Las pruebas de espacios cubren conservación de datos anteriores, almacenamiento local separado, recuperación ante fallos de almacenamiento, consultas y escrituras por espacio, respuestas tardías y claves foráneas entre espacios. No sustituye una prueba contra tu proyecto Supabase ni verifica Auth o Realtime remotos.
+
+### Capturas de tickets
+
+La migración `20261016230000_ticket_screenshots.sql` crea el bucket **privado** `ticket-screenshots` con un límite de 5 MB por archivo y tipos PNG, JPG y WebP. No lo conviertas en público. Las políticas permiten subir imágenes únicamente a tickets propios del espacio correspondiente y consultar o eliminar únicamente archivos de la cuenta autenticada. Las rutas siguen `cuenta/espacio/ticket/uuid_nombre.ext`; las vistas usan URLs firmadas de una hora que se renuevan al reabrir el ticket.
+
+El formulario admite hasta seis capturas por ticket, mediante selección, arrastre o pegado con Ctrl+V. Los archivos se suben **después** de guardar el ticket. Si falla una subida, el ticket permanece guardado y el formulario conserva los archivos pendientes para reintentar sin duplicarlo. Quitar capturas existentes se aplica al guardar; cancelar no las elimina. En demostración se guardan en IndexedDB, no en Supabase. El respaldo JSON contiene los datos de negocio, **no los archivos de capturas**.
+
+Al eliminar un ticket o espacio desde la interfaz se intenta limpiar también su carpeta en Storage. Si esa limpieza falla por red o permisos, la aplicación lo advierte: los archivos restantes siguen privados y deben limpiarse desde el bucket. Los borrados realizados directamente en SQL no eliminan archivos físicos de Storage; deben limpiarse mediante su API o el panel de Supabase. No se han ejecutado migraciones ni subidas sobre tu proyecto remoto como parte de la implementación.
 
 ## Estructura
 

@@ -7,6 +7,7 @@ import { IconComponent } from '../../shared/components/icon.component';
 import { InitialsPipe } from '../../shared/pipes/initials.pipe';
 import { SearchDialogComponent } from '../../shared/components/search-dialog.component';
 import { BrandLogoComponent } from '../../shared/components/brand-logo.component';
+import { WorkspaceSwitcherComponent } from '../../shared/components/workspace-switcher.component';
 @Component({
   selector: 'app-workspace-layout',
   imports: [
@@ -16,6 +17,7 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo.component
     IconComponent,
     InitialsPipe,
     BrandLogoComponent,
+    WorkspaceSwitcherComponent,
   ],
   templateUrl: './workspace-layout.component.html',
 })
@@ -54,6 +56,7 @@ export class WorkspaceLayoutComponent {
       });
   }
   @HostListener('document:keydown', ['$event']) shortcut(event: KeyboardEvent) {
+    if (event.defaultPrevented) return;
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault();
       this.search();
@@ -63,6 +66,9 @@ export class WorkspaceLayoutComponent {
       !event.metaKey &&
       !event.altKey &&
       !this.dialog.openDialogs.length &&
+      !(event.target as HTMLElement).closest(
+        '[role="listbox"], [role="menu"], [contenteditable="true"]',
+      ) &&
       !['INPUT', 'SELECT', 'TEXTAREA'].includes((event.target as HTMLElement).tagName)
     ) {
       event.preventDefault();

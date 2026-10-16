@@ -1,0 +1,96 @@
+<button
+  #trigger
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
+  type="button"
+  class="date-trigger"
+  [id]="inputId()"
+  [disabled]="disabled()"
+  [class.placeholder]="!value()"
+  aria-haspopup="dialog"
+  [attr.aria-expanded]="opened()"
+  [attr.aria-label]="label() + ': ' + display()"
+  [attr.aria-required]="required()"
+  (click)="opened() ? close() : open()"
+  (blur)="onTouched()"
+  (keydown.arrowdown)="$event.preventDefault(); open()"
+>
+  <span>{{ display() }}</span
+  ><app-icon name="calendar-days" [size]="16" />
+</button>
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="opened()"
+  [cdkConnectedOverlayHasBackdrop]="true"
+  cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+  [cdkConnectedOverlayViewportMargin]="12"
+  [cdkConnectedOverlayPush]="true"
+  (backdropClick)="close()"
+  (detach)="close(false)"
+  (attach)="focusDay()"
+>
+  <section
+    #panel
+    class="date-panel"
+    cdkTrapFocus
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="label()"
+    (keydown)="keydown($event)"
+  >
+    <header class="date-heading">
+      <span aria-live="polite">{{ heading() }}</span>
+      <div class="date-navigation">
+        <button
+          type="button"
+          class="icon-btn"
+          aria-label="Mes anterior"
+          [disabled]="!monthAllowed(-1)"
+          (click)="moveMonth(-1)"
+        >
+          <app-icon name="chevron-left" [size]="16" />
+        </button>
+        <button
+          type="button"
+          class="icon-btn"
+          aria-label="Mes siguiente"
+          [disabled]="!monthAllowed(1)"
+          (click)="moveMonth(1)"
+        >
+          <app-icon name="chevron-right" [size]="16" />
+        </button>
+      </div>
+    </header>
+    <div class="date-weekdays" aria-hidden="true">
+      @for (weekday of weekdays; track $index) {
+        <span>{{ weekday }}</span>
+      }
+    </div>
+    <div class="date-days">
+      @for (date of days(); track dateValue(date)) {
+        <button
+          type="button"
+          class="date-day"
+          [attr.data-date]="dateValue(date)"
+          [class.other-month]="date.getMonth() !== month().getMonth()"
+          [class.selected]="dateValue(date) === value()"
+          [class.is-today]="dateValue(date) === today()"
+          [attr.aria-current]="dateValue(date) === today() ? 'date' : null"
+          [attr.aria-label]="fullDate(date)"
+          [attr.aria-pressed]="dateValue(date) === value()"
+          [attr.aria-disabled]="!allowed(dateValue(date))"
+          [tabIndex]="dateValue(date) === active() ? 0 : -1"
+          (focus)="active.set(dateValue(date))"
+          (click)="select(dateValue(date))"
+        >
+          {{ date.getDate() }}
+        </button>
+      }
+    </div>
+    <footer class="date-footer">
+      <button type="button" [disabled]="required() || !value()" (click)="select('')">Borrar</button>
+      <button type="button" [disabled]="!allowed(today())" (click)="select(today())">Hoy</button>
+    </footer>
+  </section>
+</ng-template>

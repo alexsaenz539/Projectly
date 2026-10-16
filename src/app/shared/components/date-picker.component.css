@@ -1,0 +1,126 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.date-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 11px;
+  background: var(--surface-muted);
+  color: var(--text-primary);
+  font-size: 12px;
+}
+.date-trigger:hover {
+  border-color: var(--text-secondary);
+}
+.date-trigger[aria-expanded='true'] {
+  border-color: var(--focus);
+}
+.date-trigger app-icon,
+.placeholder {
+  color: var(--text-muted);
+}
+.date-panel {
+  width: min(296px, calc(100vw - 24px));
+  padding: 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text-primary);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.22);
+  font-size: 12px;
+}
+.date-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.date-heading > span {
+  text-transform: capitalize;
+}
+.date-navigation {
+  display: flex;
+  gap: 2px;
+}
+.date-navigation .icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+}
+.date-weekdays,
+.date-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+.date-weekdays {
+  margin-bottom: 6px;
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+}
+.date-weekdays span {
+  padding: 6px 0;
+}
+.date-day {
+  height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.date-day:hover {
+  background: var(--surface-muted);
+}
+.date-day.other-month {
+  color: var(--text-muted);
+}
+.date-day.is-today {
+  border-color: var(--focus);
+}
+.date-day.selected {
+  background: var(--text-primary);
+  color: var(--surface);
+  font-weight: 700;
+}
+.date-day[aria-disabled='true'] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.date-day:focus-visible {
+  outline-offset: 0;
+}
+.date-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+}
+.date-footer button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+.date-footer button:hover:not(:disabled) {
+  background: var(--surface-muted);
+  color: var(--text-primary);
+}

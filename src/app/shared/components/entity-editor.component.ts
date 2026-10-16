@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject, signal, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { DIALOG_DATA, Dialog, DialogRef } from '@angular/cdk/dialog';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import {
   Entity,
@@ -13,19 +14,30 @@ import {
   day,
 } from '../../core/services/models';
 import { IconComponent } from './icon.component';
+import { FormControlsModule } from './form-controls.module';
+import { TicketScreenshotsComponent } from './ticket-screenshots.component';
+import { TicketScreenshotsService } from '../../core/services/ticket-screenshots.service';
 export interface EditorData {
   kind: 'ticket' | 'project' | 'sprint' | 'member';
   entity?: Entity;
+  projectId?: string;
 }
 @Component({
   selector: 'app-entity-editor',
-  imports: [FormsModule, IconComponent],
+  imports: [FormsModule, IconComponent, FormControlsModule, TicketScreenshotsComponent],
   templateUrl: './entity-editor.component.html',
 })
 export class EntityEditorComponent {
   readonly store = inject(WorkspaceService);
   readonly data = inject<EditorData>(DIALOG_DATA);
   readonly ref = inject(DialogRef);
+  private readonly dialog = inject(Dialog);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly screenshotService = inject(TicketScreenshotsService);
+  readonly screenshots = viewChild(TicketScreenshotsComponent);
+  readonly saving = signal(false);
+  readonly workspaceId = this.store.activeWorkspaceId() ?? '';
+  readonly ticketId = this.data.entity?.id ?? crypto.randomUUID();
   readonly statuses = STATUSES;
   readonly priorities = PRIORITIES;
   readonly existing = Boolean(this.data.entity);
@@ -38,7 +50,8 @@ export class EntityEditorComponent {
     description: '',
     key: '',
     owner: this.store.myMemberId(),
-    project_id: this.store.projects().find((p) => p.status === 'Activo')?.id ?? '',
+    project_id:
+      this.data.projectId ?? this.store.projects().find((p) => p.status === 'Activo')?.id ?? '',
     type: 'Tarea',
     status:
       this.data.kind === 'ticket'
@@ -66,11 +79,38 @@ export class EntityEditorComponent {
     if (!this.availableSprints.some((s) => s.id === this.model['sprint_id']))
       this.model['sprint_id'] = '';
   }
+  createRelated(kind: 'project' | 'member'): void {
+    const workspaceId = this.store.activeWorkspaceId();
+    this.dialog
+      .open<Project | Member>(EntityEditorComponent, {
+        data: { kind } satisfies EditorData,
+        width: '510px',
+        maxWidth: 'calc(100vw - 32px)',
+        autoFocus: 'input',
+        restoreFocus: true,
+        ariaLabel: kind === 'project' ? 'Crear proyecto para el ticket' : 'Añadir responsable',
+      })
+      .closed.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((entity) => {
+        if (!entity || workspaceId !== this.store.activeWorkspaceId()) return;
+        if (kind === 'project') {
+          this.model['project_id'] = entity.id;
+          this.projectChanged();
+        } else this.model['assignee'] = entity.id;
+      });
+  }
   async save() {
+    if (this.saving() || this.store.busy()) return;
     this.error = '';
+    if (this.workspaceId !== this.store.activeWorkspaceId()) {
+      this.error = 'El espacio cambió. Cierra el formulario y vuelve a abrirlo.';
+      return;
+    }
     const m = this.model,
-      id = this.data.entity?.id ?? crypto.randomUUID();
+      id =
+        this.data.kind === 'ticket' ? this.ticketId : (this.data.entity?.id ?? crypto.randomUUID());
     let success = false;
+    let savedEntity: Entity | undefined;
     if (this.data.kind === 'ticket') {
       const project = this.store.project(m['project_id']);
       if (!project) {
@@ -91,7 +131,9 @@ export class EntityEditorComponent {
         .map((t) => Number(t.key.split('-').pop()) || 100);
       const ticket: Ticket = {
         id,
-        key: this.existing ? m['key'] : `${project.key}-${Math.max(100, ...nums) + 1}`,
+        key:
+          this.store.tickets().find((ticket) => ticket.id === id)?.key ??
+          (this.existing ? m['key'] : `${project.key}-${Math.max(100, ...nums) + 1}`),
         title: m['title'].trim(),
         description: m['description'].trim(),
         project_id: project.id,
@@ -102,7 +144,23 @@ export class EntityEditorComponent {
         due: m['due'] || null,
         sprint_id: m['sprint_id'] || null,
       };
-      success = await this.store.save('tickets', ticket);
+      this.saving.set(true);
+      const disableClose = this.ref.disableClose;
+      this.ref.disableClose = true;
+      try {
+        success = await this.store.save('tickets', ticket);
+        if (success) {
+          try {
+            await this.screenshots()?.persist();
+          } catch (error) {
+            success = false;
+            this.error = `El ticket quedó guardado, pero faltan cambios en las capturas. ${error instanceof Error ? error.message : 'Vuelve a intentar guardar.'}`;
+          }
+        }
+      } finally {
+        this.saving.set(false);
+        this.ref.disableClose = disableClose;
+      }
     } else if (this.data.kind === 'project') {
       const key = m['key'].trim().toUpperCase();
       if (!m['name'].trim() || !/^[A-Z0-9]{2,6}$/.test(key)) {
@@ -122,6 +180,7 @@ export class EntityEditorComponent {
         status: m['status'] as Project['status'],
       };
       success = await this.store.save('projects', project);
+      savedEntity = project;
     } else if (this.data.kind === 'sprint') {
       if (!m['name'].trim() || !m['project_id']) {
         this.error = 'Indica un nombre y un proyecto.';
@@ -161,10 +220,33 @@ export class EntityEditorComponent {
         role: m['role'],
       };
       success = await this.store.save('members', member);
+      savedEntity = member;
     }
-    if (success) this.ref.close();
+    if (success) this.ref.close(savedEntity);
   }
   async remove() {
-    if (this.data.entity && (await this.store.removeTicket(this.data.entity.id))) this.ref.close();
+    if (!this.data.entity || this.saving()) return;
+    if (this.workspaceId !== this.store.activeWorkspaceId()) {
+      this.error = 'El espacio cambió. Cierra el formulario y vuelve a abrirlo.';
+      return;
+    }
+    this.saving.set(true);
+    const disableClose = this.ref.disableClose;
+    this.ref.disableClose = true;
+    try {
+      if (await this.store.removeTicket(this.data.entity.id)) {
+        try {
+          await this.screenshotService.cleanup(this.workspaceId, this.ticketId);
+        } catch {
+          this.store.notify(
+            'Ticket eliminado. No se pudieron limpiar sus capturas; revisa el bucket.',
+          );
+        }
+        this.ref.close();
+      }
+    } finally {
+      this.saving.set(false);
+      this.ref.disableClose = disableClose;
+    }
   }
 }

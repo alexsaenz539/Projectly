@@ -7,8 +7,13 @@
 >
 <div class="toolbar">
   <label class="helper flex gap-2 items-center"
-    ><input type="checkbox" [ngModel]="archived()" (ngModelChange)="archived.set($event)" /> Mostrar
-    archivados</label
+    ><input
+      appSwitch
+      type="checkbox"
+      [ngModel]="archived()"
+      (ngModelChange)="archived.set($event)"
+    />
+    Mostrar archivados</label
   >
 </div>
 <div class="grid project-grid">
@@ -30,7 +35,19 @@
         <span
           >{{ ticketCount(p.id) }} tickets ·
           {{ store.member(p.owner)?.name || 'Sin responsable' }}</span
-        ><button class="btn btn-quiet" (click)="editor.open('project', p)">Editar</button>
+        >
+        <div class="header-actions">
+          @if (p.status !== 'Archivado') {
+            <button
+              class="btn btn-quiet"
+              (click)="editor.open('ticket', undefined, p.id)"
+              [attr.aria-label]="'Crear ticket en ' + p.name"
+            >
+              <app-icon name="plus" [size]="14" />Ticket
+            </button>
+          }
+          <button class="btn btn-quiet" (click)="editor.open('project', p)">Editar</button>
+        </div>
       </div>
     </article>
   } @empty {

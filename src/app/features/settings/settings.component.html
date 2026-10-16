@@ -44,16 +44,19 @@
     <p>Las preferencias se guardan en este navegador.</p>
     <label class="switch-row"
       >Tema oscuro<input
+        appSwitch
         type="checkbox"
         [ngModel]="store.preferences().dark"
         (ngModelChange)="store.setPreference('dark', $event)" /></label
     ><label class="switch-row"
       >Navegación compacta<input
+        appSwitch
         type="checkbox"
         [ngModel]="store.preferences().collapsed"
         (ngModelChange)="store.setPreference('collapsed', $event)" /></label
     ><label class="switch-row"
       >Tablas compactas<input
+        appSwitch
         type="checkbox"
         [ngModel]="store.preferences().dense"
         (ngModelChange)="store.setPreference('dense', $event)"

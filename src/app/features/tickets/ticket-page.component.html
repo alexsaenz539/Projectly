@@ -1,0 +1,49 @@
+<div class="ticket-page">
+  <nav class="ticket-navigation" aria-label="Navegación del ticket">
+    <a class="btn" routerLink="/kanban">Volver al Kanban</a>
+    <span class="helper">Detalle del ticket · Solo lectura</span>
+  </nav>
+  @if (store.loading()) {
+    <p class="helper" role="status">Cargando contenido del ticket…</p>
+  } @else if (ticket(); as ticket) {
+    <header class="ticket-header">
+      <p class="eyebrow">{{ ticket.key }}</p>
+      <h1>{{ ticket.title }}</h1>
+      <div class="ticket-badges">
+        <app-badge [value]="ticket.status" />
+        <app-badge [value]="ticket.priority" />
+      </div>
+    </header>
+    <div class="ticket-content">
+      <div class="ticket-body">
+        <section class="ticket-section" aria-labelledby="description-title">
+          <h2 id="description-title">Descripción</h2>
+          <p class="ticket-description">{{ ticket.description || 'Este ticket no tiene descripción.' }}</p>
+        </section>
+        <section class="ticket-section" aria-label="Capturas adjuntas">
+          @for (scope of [store.activeWorkspaceId() + '/' + ticket.id]; track scope) {
+            <app-ticket-screenshots [workspaceId]="store.activeWorkspaceId()!" [ticketId]="ticket.id" [existing]="true" [readOnly]="true" />
+          }
+        </section>
+      </div>
+      <aside class="ticket-section" aria-labelledby="ticket-data-title">
+        <h2 id="ticket-data-title">Información del ticket</h2>
+        <dl>
+          <div><dt>Clave</dt><dd class="mono">{{ ticket.key }}</dd></div>
+          <div><dt>Proyecto</dt><dd>{{ store.project(ticket.project_id)?.name || 'Proyecto no disponible' }}</dd></div>
+          <div><dt>Responsable</dt><dd>{{ store.member(ticket.assignee)?.name || 'Sin asignar' }}</dd></div>
+          <div><dt>Tipo</dt><dd>{{ ticket.type || 'Sin tipo' }}</dd></div>
+          <div><dt>Estado</dt><dd>{{ ticket.status }}</dd></div>
+          <div><dt>Prioridad</dt><dd>{{ ticket.priority }}</dd></div>
+          <div><dt>Vencimiento</dt><dd>{{ ticket.due ? (ticket.due | date: 'dd/MM/yyyy') : 'Sin fecha' }}</dd></div>
+          <div><dt>Sprint</dt><dd>{{ sprintName() }}</dd></div>
+        </dl>
+      </aside>
+    </div>
+  } @else {
+    <section class="ticket-section" role="status">
+      <h1>{{ wrongWorkspace() ? 'Este ticket pertenece a otro espacio' : 'Ticket no disponible' }}</h1>
+      <p class="helper">{{ wrongWorkspace() ? 'Selecciona el espacio original para consultar su contenido.' : 'El ticket no existe en este espacio o ya fue eliminado.' }}</p>
+    </section>
+  }
+</div>

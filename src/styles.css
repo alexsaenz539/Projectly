@@ -39,6 +39,7 @@
   --overlay: rgb(0 0 0 / 0.34);
 }
 .dark {
+  color-scheme: dark;
   --bg-app: #0b1220;
   --bg-shell: #111827;
   --surface: #182235;
@@ -60,6 +61,109 @@
 }
 * {
   box-sizing: border-box;
+}
+/* Shared scrollbars: theme-aware and usable without the native arrow gutters. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-subtle) transparent;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+*::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+.sidebar {
+  scrollbar-gutter: stable;
+}
+
+/* Shared form controls, used by FormControlsModule. */
+.form-row select.themed-select,
+select.themed-select {
+  appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%2394a3b8' stroke-width='1.7' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+}
+select.themed-select[aria-expanded='true'] {
+  border-color: var(--focus);
+}
+input.app-switch[type='checkbox'] {
+  appearance: none;
+  display: inline-block;
+  position: relative;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 22px;
+  min-height: 22px;
+  padding: 0;
+  margin: 0;
+  vertical-align: middle;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--surface-muted);
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease;
+}
+input.app-switch[type='checkbox']::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition:
+    transform 180ms ease,
+    background 180ms ease;
+}
+input.app-switch[type='checkbox']:checked {
+  background: var(--focus);
+  border-color: var(--focus);
+}
+input.app-switch[type='checkbox']:checked::before {
+  transform: translateX(16px);
+  background: var(--surface);
+}
+input.app-switch[type='checkbox']:hover:not(:disabled) {
+  border-color: var(--text-secondary);
+}
+input.app-switch[type='checkbox']:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+label:has(> input.app-switch) {
+  min-height: 44px;
+  cursor: pointer;
+}
+@media (forced-colors: active) {
+  input.app-switch[type='checkbox'] {
+    appearance: auto;
+  }
+  input.app-switch[type='checkbox']::before {
+    display: none;
+  }
 }
 html {
   font-family:
@@ -800,12 +904,28 @@ button:disabled {
   font-size: 10px;
 }
 .kanban-card {
+  position: relative;
   padding: 15px;
   margin-bottom: 9px;
   border-radius: 14px;
   background: var(--surface);
   border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-card);
+}
+.kanban-card .card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  cursor: pointer;
+}
+.kanban-card .card-link:focus-visible::after {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+.kanban-card .drag-handle {
+  position: relative;
+  z-index: 1;
 }
 .kanban-card strong {
   font-size: 12px;
@@ -933,6 +1053,12 @@ button:disabled {
   display: grid;
   gap: 14px;
 }
+.editor-fields {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
 .form-row {
   display: grid;
   gap: 6px;
@@ -940,6 +1066,26 @@ button:disabled {
 .form-row label {
   font-size: 11px;
   font-weight: 600;
+}
+.form-label-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.form-label-actions .text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+.form-helper {
+  margin: 2px 0 0;
+}
+.project-card .card-footer {
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .form-row input,
 .form-row select,

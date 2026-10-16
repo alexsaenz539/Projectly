@@ -266,6 +266,114 @@ export class WorkspaceService {
       this.spaceBusy.set(false);
     }
   }
+  async updateWorkspace(
+    id: string,
+    name: string,
+    slug: string,
+    description: string,
+  ): Promise<void> {
+    if (this.spaceBusy() || this.busy() || this.directoryLoading())
+      throw new Error('Espera a que termine la operación actual.');
+    const existing = this.workspaceDirectory().find((space) => space.id === id);
+    if (!existing) throw new Error('El espacio ya no está disponible.');
+    const failure = Object.values(
+      workspaceErrors(name, slug, description, this.workspaceDirectory(), id),
+    ).find(Boolean);
+    if (failure) throw new Error(failure);
+    this.spaceBusy.set(true);
+    const epoch = this.authEpoch;
+    try {
+      let updated: WorkspaceRecord;
+      if (this.local) updated = this.local.update(id, name, slug, description);
+      else {
+        const user = this.auth.user();
+        if (!this.client || !user) throw new Error('La sesión ha terminado.');
+        const { data, error } = await this.client
+          .from('workspaces')
+          .update({ name: name.trim(), slug, description: description.trim() })
+          .eq('id', id)
+          .eq('user_id', user.id)
+          .select()
+          .single();
+        if (error) throw error;
+        if (epoch !== this.authEpoch || user.id !== this.auth.user()?.id)
+          throw new Error('La sesión ha cambiado. Abre de nuevo la lista de espacios.');
+        updated = { ...existing, ...data };
+      }
+      this.directoryRevision++;
+      this.directoryLoading.set(false);
+      this.workspaceDirectory.update((spaces) =>
+        spaces.map((space) =>
+          space.id === id
+            ? { ...space, name: updated.name, slug: updated.slug, description: updated.description }
+            : space,
+        ),
+      );
+      this.notify('Espacio actualizado.');
+    } catch (error) {
+      throw new Error(this.message(error));
+    } finally {
+      this.spaceBusy.set(false);
+    }
+  }
+  async removeWorkspace(id: string): Promise<void> {
+    if (this.spaceBusy() || this.busy() || this.directoryLoading())
+      throw new Error('Espera a que termine la operación actual.');
+    if (!this.workspaceDirectory().some((space) => space.id === id))
+      throw new Error('El espacio ya no está disponible.');
+    this.spaceBusy.set(true);
+    const epoch = this.authEpoch;
+    try {
+      const remaining = this.workspaceDirectory().filter((space) => space.id !== id);
+      const wasActive = id === this.activeWorkspaceId();
+      const next = remaining[0];
+      // Read the fallback before deleting anything; corrupt local data must not cause partial deletion.
+      const nextData =
+        wasActive && this.local && next ? this.local.read(next.id) : structuredClone(EMPTY);
+      if (this.local) this.local.remove(id);
+      else {
+        const user = this.auth.user();
+        if (!this.client || !user) throw new Error('La sesión ha terminado.');
+        const { error } = await this.client
+          .from('workspaces')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', user.id)
+          .select('id')
+          .single();
+        if (error) throw error;
+        if (epoch !== this.authEpoch || user.id !== this.auth.user()?.id)
+          throw new Error('La sesión ha cambiado. Abre de nuevo la lista de espacios.');
+        if (wasActive) {
+          try {
+            const key = 'projectly-active-workspace-' + user.id;
+            if (next) localStorage.setItem(key, next.id);
+            else localStorage.removeItem(key);
+          } catch {
+            /* The current selection still works in memory. */
+          }
+        }
+      }
+      this.directoryRevision++;
+      this.directoryLoading.set(false);
+      this.workspaceDirectory.update((spaces) => spaces.filter((space) => space.id !== id));
+      if (wasActive) this.activate(next?.id ?? null, nextData);
+      this.notify('Espacio y datos asociados eliminados.');
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error &&
+        'code' in error &&
+        ['42501', '23503'].includes(String(error.code))
+      )
+        throw new Error(
+          'No se pudo eliminar el espacio. Comprueba que esté aplicada la migración workspace_management en Supabase.',
+        );
+      throw new Error(this.message(error));
+    } finally {
+      this.spaceBusy.set(false);
+    }
+  }
   private loadPreferences(): Preferences {
     const defaults = { dark: false, collapsed: false, dense: false, myMemberId: '' };
     try {

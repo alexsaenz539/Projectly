@@ -22,6 +22,7 @@ export function workspaceErrors(
   slug: string,
   description: string,
   records: WorkspaceRecord[],
+  excludeId?: string,
 ) {
   return {
     name:
@@ -31,7 +32,10 @@ export function workspaceErrors(
     slug:
       slug.length < 3 || slug.length > 32 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)
         ? 'Usa entre 3 y 32 caracteres: letras minúsculas, números y guiones.'
-        : slug === 'demo' || records.some((record) => record.slug === slug)
+        : slug === 'demo' ||
+            records.some(
+              (record) => (!excludeId || record.id !== excludeId) && record.slug === slug,
+            )
           ? 'Ese identificador ya está en uso.'
           : '',
     description:

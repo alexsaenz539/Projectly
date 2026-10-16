@@ -27,6 +27,12 @@ import {
   LucidePlus,
   LucideX,
   LucideGripVertical,
+  LucideChevronsUpDown,
+  LucideCheck,
+  LucideLayers,
+  LucideFolders,
+  LucideArrowUpRight,
+  LucideCalendarDays,
 } from '@lucide/angular';
 registerLocaleData(es);
 
@@ -57,6 +63,12 @@ export const appConfig: ApplicationConfig = {
       LucidePlus,
       LucideX,
       LucideGripVertical,
+      LucideChevronsUpDown,
+      LucideCheck,
+      LucideLayers,
+      LucideFolders,
+      LucideArrowUpRight,
+      LucideCalendarDays,
     ),
   ],
 };

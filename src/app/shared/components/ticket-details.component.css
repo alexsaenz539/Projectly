@@ -1,0 +1,12 @@
+.dialog-head > div { min-width: 0; }
+.dialog-head .icon-btn { flex: none; }
+h2 { overflow-wrap: anywhere; line-height: 1.4; }
+.ticket-detail-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.ticket-detail-description h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; }
+.ticket-detail-description p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; line-height: 1.7; color: var(--text-secondary); }
+.ticket-detail-metadata { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 24px 0; padding: 18px; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--surface-muted); }
+dt { margin-bottom: 5px; color: var(--text-muted); font-size: 10px; }
+dd { margin: 0; overflow-wrap: anywhere; font-size: 12px; font-weight: 500; }
+.ticket-detail-sprint { grid-column: 1 / -1; }
+@media (max-width: 380px) { .ticket-detail-metadata { grid-template-columns: 1fr; } }
+.ticket-details { max-height: 85dvh; overflow-y: auto; }

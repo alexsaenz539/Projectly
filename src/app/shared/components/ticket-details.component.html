@@ -1,0 +1,23 @@
+<section class="dialog ticket-details" aria-labelledby="ticket-details-title">
+  <header class="dialog-head">
+    <div><p class="eyebrow">{{ ticket.key }} · Solo lectura</p><h2 id="ticket-details-title">{{ ticket.title }}</h2></div>
+    <button type="button" class="icon-btn" aria-label="Cerrar detalle" (click)="ref.close()"><app-icon name="x" /></button>
+  </header>
+  <div class="ticket-detail-badges"><app-badge [value]="ticket.status" /><app-badge [value]="ticket.priority" /></div>
+  <section class="ticket-detail-description" aria-labelledby="ticket-description-label">
+    <h3 id="ticket-description-label">Descripción</h3>
+    <p>{{ ticket.description || 'Este ticket no tiene descripción.' }}</p>
+  </section>
+  <dl class="ticket-detail-metadata">
+    <div><dt>Proyecto</dt><dd>{{ store.project(ticket.project_id)?.name || 'Proyecto no disponible' }}</dd></div>
+    <div><dt>Responsable</dt><dd>{{ store.member(ticket.assignee)?.name || 'Sin asignar' }}</dd></div>
+    <div><dt>Tipo</dt><dd>{{ ticket.type }}</dd></div>
+    <div><dt>Vencimiento</dt><dd>{{ ticket.due ? (ticket.due | date: 'dd/MM/yyyy') : 'Sin fecha' }}</dd></div>
+    <div class="ticket-detail-sprint"><dt>Sprint</dt><dd>{{ sprintName }}</dd></div>
+  </dl>
+  <app-ticket-screenshots [workspaceId]="workspaceId" [ticketId]="ticket.id" [existing]="true" [readOnly]="true" />
+  <footer class="form-actions">
+    <button type="button" class="btn" (click)="ref.close()">Cerrar</button>
+    <button type="button" class="btn btn-primary" (click)="openPage()">Abrir en pestaña</button>
+  </footer>
+</section>

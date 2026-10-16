@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { FormControlsModule } from '../../shared/components/form-controls.module';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { EditorService } from '../../core/services/editor.service';
 import { STATUSES } from '../../core/services/models';
@@ -8,7 +9,13 @@ import { IconComponent } from '../../shared/components/icon.component';
 import { TicketTableComponent } from '../../shared/components/ticket-table.component';
 @Component({
   selector: 'app-tickets',
-  imports: [FormsModule, PageHeaderComponent, IconComponent, TicketTableComponent],
+  imports: [
+    FormsModule,
+    PageHeaderComponent,
+    IconComponent,
+    TicketTableComponent,
+    FormControlsModule,
+  ],
   templateUrl: './tickets.component.html',
 })
 export class TicketsComponent {

@@ -1,0 +1,47 @@
+:host {
+  display: block;
+  width: 100%;
+}
+.select-panel {
+  max-height: min(288px, 60vh);
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-primary);
+  box-shadow: 0 14px 42px rgb(0 0 0 / 0.2);
+  outline: none;
+}
+.select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 38px;
+  padding: 9px 11px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.select-option span {
+  overflow-wrap: anywhere;
+}
+.select-option.active {
+  background: var(--surface-muted);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
+}
+.select-option[aria-selected='true'] {
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
+  font-weight: 600;
+}
+.select-option[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.select-empty {
+  padding: 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+}

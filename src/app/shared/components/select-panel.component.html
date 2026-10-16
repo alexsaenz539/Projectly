@@ -1,0 +1,30 @@
+<div
+  #list
+  class="select-panel"
+  role="listbox"
+  tabindex="0"
+  [attr.aria-label]="label()"
+  [attr.aria-activedescendant]="active() >= 0 ? id() + '-' + active() : null"
+  (keydown)="keydown($event)"
+>
+  @for (option of options(); track $index; let index = $index) {
+    <div
+      class="select-option"
+      role="option"
+      [id]="id() + '-' + index"
+      [class.active]="index === active()"
+      [attr.aria-selected]="option.value === value()"
+      [attr.aria-disabled]="option.disabled"
+      (pointermove)="!option.disabled && active.set(index)"
+      (click)="!option.disabled && chosen.emit(option.value)"
+    >
+      <span>{{ option.label }}</span>
+      @if (option.value === value()) {
+        <app-icon name="check" [size]="15" />
+      }
+    </div>
+  }
+  @if (!options().length) {
+    <div class="select-empty">Sin opciones</div>
+  }
+</div>

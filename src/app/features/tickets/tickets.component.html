@@ -2,7 +2,10 @@
   title="Tickets"
   eyebrow="Trabajo diario"
   subtitle="Busca, filtra y abre cada ticket para editar sus datos."
-  ><button class="btn btn-primary" (click)="editor.open('ticket')">
+  ><button
+    class="btn btn-primary"
+    (click)="editor.open('ticket', undefined, project() || undefined)"
+  >
     <app-icon name="plus" />Crear ticket
   </button></app-page-header
 >
