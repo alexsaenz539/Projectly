@@ -8,17 +8,25 @@
       (focusin)="toasts.pause(item.id, 'focus')"
       (focusout)="toasts.resume(item.id, 'focus')"
     >
-      <div [attr.role]="item.kind === 'error' ? 'alert' : 'status'" aria-atomic="true">
-        <strong>{{ labels[item.kind] }}</strong>
-        <p>{{ item.message }}</p>
+      <div
+        class="toast-content"
+        [attr.role]="item.kind === 'error' ? 'alert' : 'status'"
+        aria-atomic="true"
+      >
+        <span class="toast-icon" aria-hidden="true"
+          ><app-icon [name]="icons[item.kind]" [size]="18"
+        /></span>
+        <p>
+          <span class="sr-only">{{ labels[item.kind] }}: </span>{{ item.message }}
+        </p>
       </div>
       <button
-        class="icon-btn"
+        class="toast-close"
         type="button"
         [attr.aria-label]="'Cerrar aviso: ' + labels[item.kind]"
         (click)="toasts.dismiss(item.id)"
       >
-        ×
+        <app-icon name="x" [size]="15" aria-hidden="true" />
       </button>
       @if (item.kind !== 'error') {
         <div class="toast-countdown" aria-hidden="true">

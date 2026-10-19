@@ -34,6 +34,10 @@ import {
   LucideFolders,
   LucideArrowUpRight,
   LucideCalendarDays,
+  LucideCircleCheck,
+  LucideCircleAlert,
+  LucideTriangleAlert,
+  LucideInfo,
 } from '@lucide/angular';
 registerLocaleData(es);
 
@@ -71,6 +75,10 @@ export const appConfig: ApplicationConfig = {
       LucideFolders,
       LucideArrowUpRight,
       LucideCalendarDays,
+      LucideCircleCheck,
+      LucideCircleAlert,
+      LucideTriangleAlert,
+      LucideInfo,
     ),
   ],
 };

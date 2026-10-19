@@ -1,6 +1,6 @@
 <section class="dialog ticket-details" aria-labelledby="ticket-details-title">
   <header class="dialog-head">
-    <div><p class="eyebrow">{{ ticket.key }} · Solo lectura</p><h2 id="ticket-details-title">{{ ticket.title }}</h2></div>
+    <div><h2 id="ticket-details-title">{{ ticket.key }} - {{ ticket.title }}</h2></div>
     <button type="button" class="icon-btn" aria-label="Cerrar detalle" (click)="ref.close()"><app-icon name="x" /></button>
   </header>
   <div class="ticket-detail-badges"><app-badge [value]="ticket.status" /><app-badge [value]="ticket.priority" /></div>

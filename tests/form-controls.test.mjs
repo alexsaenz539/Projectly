@@ -61,7 +61,11 @@ test('kanban cards expose read-only details without a status selector and retain
     new URL('../src/app/features/kanban/kanban.component.html', import.meta.url),
     'utf8',
   );
-  assert.doesNotMatch(template, /<select\b|ngModelChange|Cambiar estado de/);
+  const cards = template.slice(
+    template.indexOf('<article class="kanban-card"'),
+    template.indexOf('</article>'),
+  );
+  assert.doesNotMatch(cards, /<select\b|ngModelChange|Cambiar estado de/);
   assert.match(template, /editor\.viewTicket\(t\)/);
   assert.match(template, /cdkDragHandle/);
   assert.match(template, /\(cdkDropListDropped\)="drop\(\$event\)"/);

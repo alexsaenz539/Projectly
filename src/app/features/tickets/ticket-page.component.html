@@ -1,14 +1,13 @@
 <div class="ticket-page">
   <nav class="ticket-navigation" aria-label="Navegación del ticket">
     <a class="btn" routerLink="/kanban">Volver al Kanban</a>
-    <span class="helper">Detalle del ticket · Solo lectura</span>
+    <span class="helper">Detalle del ticket</span>
   </nav>
   @if (store.loading()) {
     <p class="helper" role="status">Cargando contenido del ticket…</p>
   } @else if (ticket(); as ticket) {
     <header class="ticket-header">
-      <p class="eyebrow">{{ ticket.key }}</p>
-      <h1>{{ ticket.title }}</h1>
+      <h1>{{ ticket.key }} - {{ ticket.title }}</h1>
       <div class="ticket-badges">
         <app-badge [value]="ticket.status" />
         <app-badge [value]="ticket.priority" />

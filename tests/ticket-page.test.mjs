@@ -71,3 +71,11 @@ test('ticket detail has its own protected route and read-only full content with 
   assert.match(template, /routerLink="\/kanban"/);
   assert.doesNotMatch(template, /ngModel|<input|<select|<textarea/);
 });
+
+test('ticket headings show the key and title separated by a hyphen without the read-only caption', () => {
+  for (const path of ['features/tickets/ticket-page.component.html', 'shared/components/ticket-details.component.html']) {
+    const template = read(path);
+    assert.match(template, /{{ ticket.key }} - {{ ticket.title }}/);
+    assert.doesNotMatch(template, /Solo lectura|·/);
+  }
+});

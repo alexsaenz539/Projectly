@@ -148,3 +148,25 @@ test('new toasts append below existing ones without resetting their countdown', 
   );
   toasts.ngOnDestroy();
 });
+
+test('compact toast uses registered status icons, an accessible hidden label and the countdown', () => {
+  const base = '../src/app/shared/components/toast/';
+  const component = readFileSync(new URL(base + 'toast.component.ts', import.meta.url), 'utf8');
+  const template = readFileSync(new URL(base + 'toast.component.html', import.meta.url), 'utf8');
+  const config = readFileSync(new URL('../src/app/app.config.ts', import.meta.url), 'utf8');
+  for (const [name, symbol] of [
+    ['circle-check', 'LucideCircleCheck'],
+    ['circle-alert', 'LucideCircleAlert'],
+    ['triangle-alert', 'LucideTriangleAlert'],
+    ['info', 'LucideInfo'],
+  ]) {
+    assert.ok(component.includes(`'${name}'`));
+    assert.equal((config.match(new RegExp('\\b' + symbol + '\\b', 'g')) || []).length, 2);
+  }
+  assert.doesNotMatch(template, /<strong/);
+  assert.match(template, /class="sr-only"/);
+  assert.match(template, /\[name\]="icons\[item.kind\]"/);
+  assert.match(template, /item.kind !== 'error'/);
+  assert.match(template, /toast-countdown-fill/);
+  assert.match(template, /toasts.dismiss\(item.id\)/);
+});

@@ -2,10 +2,78 @@
   title="Tablero Kanban"
   eyebrow="Flujo de trabajo"
   subtitle="Arrastra los tickets entre columnas para cambiar su estado."
-  ><button class="btn btn-primary" (click)="editor.open('ticket')">
+  ><button
+    class="btn btn-primary"
+    (click)="editor.open('ticket', undefined, project() || undefined)"
+  >
     <app-icon name="plus" />Crear ticket
   </button></app-page-header
 >
+<section class="kanban-filters" aria-label="Filtros del tablero Kanban">
+  <div class="kanban-filter-fields">
+    <div class="form-row">
+      <label for="kanban-query">Buscar ticket</label>
+      <input
+        id="kanban-query"
+        type="search"
+        placeholder="ID o título"
+        [ngModel]="query()"
+        (ngModelChange)="query.set($event)"
+      />
+    </div>
+    <div class="form-row">
+      <label for="kanban-project">Proyecto</label>
+      <select id="kanban-project" [ngModel]="project()" (ngModelChange)="project.set($event)">
+        <option value="">Todos los proyectos</option>
+        @for (project of store.projects(); track project.id) {
+          <option [value]="project.id">{{ project.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="form-row">
+      <label for="kanban-assignee">Responsable</label>
+      <select id="kanban-assignee" [ngModel]="assignee()" (ngModelChange)="assignee.set($event)">
+        <option value="">Todos los responsables</option>
+        <option value="__none__">Sin asignar</option>
+        @for (member of store.members(); track member.id) {
+          <option [value]="member.id">{{ member.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="form-row">
+      <label for="kanban-priority">Prioridad</label>
+      <select id="kanban-priority" [ngModel]="priority()" (ngModelChange)="priority.set($event)">
+        <option value="">Todas las prioridades</option>
+        @for (priority of priorities; track priority) {
+          <option [value]="priority">{{ priority }}</option>
+        }
+      </select>
+    </div>
+    <div class="form-row">
+      <label for="kanban-version">Versión de entrega</label>
+      <select id="kanban-version" [ngModel]="version()" (ngModelChange)="version.set($event)">
+        <option value="">Todas las versiones</option>
+        <option value="__none__">Sin versión</option>
+        @for (version of versions(); track version) {
+          <option [value]="version">{{ version }}</option>
+        }
+      </select>
+    </div>
+  </div>
+  <div class="kanban-filter-summary">
+    <span class="count-note" role="status" aria-live="polite"
+      >{{ visible().length }} de {{ store.tickets().length }} tickets</span
+    >
+    <button type="button" class="btn" [disabled]="!hasFilters()" (click)="clearFilters()">
+      Limpiar filtros
+    </button>
+  </div>
+  @if (hasFilters() && !visible().length) {
+    <p class="helper">
+      No hay tickets que coincidan con los filtros. Prueba otros valores o limpia los filtros.
+    </p>
+  }
+</section>
 <div class="kanban" cdkDropListGroup>
   @for (status of statuses; track status) {
     <section
@@ -28,7 +96,11 @@
             </button>
           </div>
           <strong
-            ><button class="card-link" (click)="editor.viewTicket(t)" [attr.aria-label]="'Ver detalle de ' + t.key + ': ' + t.title">
+            ><button
+              class="card-link"
+              (click)="editor.viewTicket(t)"
+              [attr.aria-label]="'Ver detalle de ' + t.key + ': ' + t.title"
+            >
               {{ t.title }}
             </button></strong
           ><span class="subline"
@@ -40,7 +112,9 @@
         </article>
       }
       @if (!tickets(status).length) {
-        <p class="helper text-center mt-6">Arrastra un ticket aquí</p>
+        <p class="helper text-center mt-6">
+          {{ hasFilters() ? 'Sin tickets con estos filtros' : 'Arrastra un ticket aquí' }}
+        </p>
       }
     </section>
   }

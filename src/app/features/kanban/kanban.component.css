@@ -1,0 +1,30 @@
+.kanban-filters {
+  margin-bottom: 20px;
+}
+.kanban-filter-fields {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.3fr) repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.form-row {
+  min-width: 0;
+  margin: 0;
+}
+.kanban-filter-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+@media (max-width: 1200px) {
+  .kanban-filter-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .kanban-filter-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
