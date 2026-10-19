@@ -3,10 +3,10 @@
     <div
       class="system-toast"
       [attr.data-kind]="item.kind"
-      (mouseenter)="toasts.pause(item.id)"
-      (mouseleave)="toasts.resume(item.id)"
-      (focusin)="toasts.pause(item.id)"
-      (focusout)="toasts.resume(item.id)"
+      (mouseenter)="toasts.pause(item.id, 'hover')"
+      (mouseleave)="toasts.resume(item.id, 'hover')"
+      (focusin)="toasts.pause(item.id, 'focus')"
+      (focusout)="toasts.resume(item.id, 'focus')"
     >
       <div [attr.role]="item.kind === 'error' ? 'alert' : 'status'" aria-atomic="true">
         <strong>{{ labels[item.kind] }}</strong>
@@ -20,6 +20,14 @@
       >
         ×
       </button>
+      @if (item.kind !== 'error') {
+        <div class="toast-countdown" aria-hidden="true">
+          <span
+            class="toast-countdown-fill"
+            [style.animation-play-state]="item.paused ? 'paused' : 'running'"
+          ></span>
+        </div>
+      }
     </div>
   }
 </div>

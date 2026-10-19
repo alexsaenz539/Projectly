@@ -5,32 +5,67 @@
   width: min(400px, calc(100vw - 32px));
   max-height: calc(100dvh - 48px);
   overflow-y: auto;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   z-index: 2000;
   pointer-events: none;
 }
 .system-toast {
+  --toast-background: var(--status-neutral-bg);
+  --toast-accent: var(--status-neutral-text);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
   pointer-events: auto;
   display: flex;
   align-items: start;
   justify-content: space-between;
   gap: 16px;
   padding: 16px;
-  border: 1px solid var(--border-subtle);
-  border-left: 4px solid var(--focus);
+  border: 1px solid color-mix(in srgb, var(--toast-accent) 20%, var(--toast-background));
   border-radius: 12px;
-  background: var(--surface);
+  background: var(--toast-background);
   color: var(--text-primary);
   box-shadow: 0 8px 28px #0002;
 }
+.system-toast[data-kind='success'] {
+  --toast-background: var(--status-success-bg);
+  --toast-accent: var(--status-success-text);
+}
 .system-toast[data-kind='error'] {
-  border-left-color: var(--danger, #dc2626);
+  --toast-background: var(--status-danger-bg);
+  --toast-accent: var(--status-danger-text);
 }
 .system-toast[data-kind='warning'] {
-  border-left-color: #b7791f;
+  --toast-background: var(--status-warning-bg);
+  --toast-accent: var(--status-warning-text);
+}
+.toast-countdown {
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  background: color-mix(in srgb, var(--toast-accent) 12%, var(--toast-background));
+}
+.toast-countdown-fill {
+  display: block;
+  height: 100%;
+  background: var(--toast-accent);
+  transform-origin: left;
+  animation: toast-countdown 6s linear forwards;
+}
+@keyframes toast-countdown {
+  to {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast-countdown-fill {
+    animation-timing-function: steps(6, end);
+  }
 }
 strong {
+  color: var(--toast-accent);
   font-size: 13px;
 }
 p {

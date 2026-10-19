@@ -6,6 +6,8 @@ import ts from 'typescript';
 
 function makeToasts() {
   const timers = new Map();
+  const delays = new Map();
+  let now = 0;
   let timerId = 0;
   const signal = (value) => {
     const read = () => value;
@@ -36,14 +38,23 @@ function makeToasts() {
         assert.equal(name, '@angular/core');
         return { Injectable: () => (target) => target, signal };
       },
-      setTimeout: (callback) => {
+      Date: { now: () => now },
+      setTimeout: (callback, delay) => {
         timers.set(++timerId, callback);
+        delays.set(timerId, delay);
         return timerId;
       },
       clearTimeout: (id) => timers.delete(id),
     },
   );
-  return { toasts: new exports.ToastService(), timers };
+  return {
+    toasts: new exports.ToastService(),
+    timers,
+    delays,
+    advance: (ms) => {
+      now += ms;
+    },
+  };
 }
 
 test('toasts support kinds, skip blanks, deduplicate and limit visible messages', () => {
@@ -93,4 +104,47 @@ test('ticket rows preserve native keyboard button and expose delivery version', 
   assert.match(template, /\$event.stopPropagation\(\); editor.open/);
   assert.match(template, /<button type="button"/);
   assert.match(template, /target_version \|\| 'Sin versión'/);
+});
+
+test('toast countdown preserves remaining time across overlapping hover and focus pauses', () => {
+  const { toasts, timers, delays, advance } = makeToasts();
+  const id = toasts.success('Guardado');
+  assert.equal([...delays.values()].at(-1), 6000);
+  advance(2000);
+  toasts.pause(id, 'hover');
+  assert.equal(toasts.messages()[0].paused, true);
+  advance(1000);
+  toasts.pause(id, 'focus');
+  toasts.resume(id, 'hover');
+  assert.equal(timers.size, 0);
+  assert.equal(toasts.messages()[0].paused, true);
+  advance(1000);
+  toasts.resume(id, 'focus');
+  assert.equal(toasts.messages()[0].paused, false);
+  assert.equal([...delays.values()].at(-1), 4000);
+  toasts.resume(id, 'hover');
+  assert.equal(timers.size, 1);
+  advance(1000);
+  toasts.pause(id, 'hover');
+  toasts.resume(id, 'hover');
+  assert.equal([...delays.values()].at(-1), 3000);
+  toasts.ngOnDestroy();
+  assert.equal(timers.size, 0);
+});
+
+test('new toasts append below existing ones without resetting their countdown', () => {
+  const { toasts, timers, advance } = makeToasts();
+  const first = toasts.info('Primero');
+  advance(2000);
+  const second = toasts.success('Segundo');
+  assert.deepEqual(
+    Array.from(toasts.messages(), (item) => item.id),
+    [first, second],
+  );
+  [...timers.values()][0]();
+  assert.deepEqual(
+    Array.from(toasts.messages(), (item) => item.id),
+    [second],
+  );
+  toasts.ngOnDestroy();
 });

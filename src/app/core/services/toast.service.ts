@@ -4,12 +4,21 @@ export interface ToastMessage {
   id: number;
   message: string;
   kind: ToastKind;
+  paused: boolean;
 }
 @Injectable({ providedIn: 'root' })
 export class ToastService implements OnDestroy {
   readonly messages = signal<ToastMessage[]>([]);
   private nextId = 0;
   private readonly timers = new Map<number, ReturnType<typeof setTimeout>>();
+  private readonly countdowns = new Map<
+    number,
+    {
+      remaining: number;
+      startedAt: number;
+      pauses: Set<string>;
+    }
+  >();
   show(message: string, kind: ToastKind = 'info'): number {
     message = message.trim();
     if (!message) return 0;
@@ -17,8 +26,11 @@ export class ToastService implements OnDestroy {
     if (existing) return existing.id;
     const id = ++this.nextId;
     if (this.messages().length >= 4) this.dismiss(this.messages()[0].id);
-    this.messages.update((items) => [...items, { id, message, kind }]);
-    if (kind !== 'error') this.resume(id);
+    this.messages.update((items) => [...items, { id, message, kind, paused: false }]);
+    if (kind !== 'error') {
+      this.countdowns.set(id, { remaining: 6000, startedAt: Date.now(), pauses: new Set() });
+      this.resume(id);
+    }
     return id;
   }
   success(message: string) {
@@ -33,24 +45,42 @@ export class ToastService implements OnDestroy {
   info(message: string) {
     return this.show(message, 'info');
   }
-  pause(id: number) {
+  pause(id: number, reason = 'manual') {
+    const countdown = this.countdowns.get(id);
+    if (!countdown || countdown.pauses.has(reason)) return;
+    if (this.timers.has(id)) {
+      countdown.remaining = Math.max(0, countdown.remaining - (Date.now() - countdown.startedAt));
+    }
+    countdown.pauses.add(reason);
     clearTimeout(this.timers.get(id));
     this.timers.delete(id);
+    this.messages.update((items) =>
+      items.map((item) => (item.id === id ? { ...item, paused: true } : item)),
+    );
   }
-  resume(id: number) {
-    this.pause(id);
-    const item = this.messages().find((message) => message.id === id);
-    if (item && item.kind !== 'error')
-      this.timers.set(
-        id,
-        setTimeout(() => this.dismiss(id), 6000),
-      );
+  resume(id: number, reason = 'manual') {
+    const countdown = this.countdowns.get(id);
+    if (!countdown) return;
+    countdown.pauses.delete(reason);
+    if (countdown.pauses.size || this.timers.has(id)) return;
+    countdown.startedAt = Date.now();
+    this.messages.update((items) =>
+      items.map((item) => (item.id === id ? { ...item, paused: false } : item)),
+    );
+    this.timers.set(
+      id,
+      setTimeout(() => this.dismiss(id), countdown.remaining),
+    );
   }
   dismiss(id: number) {
-    this.pause(id);
+    clearTimeout(this.timers.get(id));
+    this.timers.delete(id);
+    this.countdowns.delete(id);
     this.messages.update((items) => items.filter((item) => item.id !== id));
   }
   ngOnDestroy() {
-    for (const id of this.timers.keys()) this.pause(id);
+    for (const timer of this.timers.values()) clearTimeout(timer);
+    this.timers.clear();
+    this.countdowns.clear();
   }
 }
