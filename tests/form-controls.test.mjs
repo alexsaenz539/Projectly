@@ -315,6 +315,7 @@ function makeEditor(data = { kind: 'ticket' }) {
     './icon.component': {},
     './form-controls.module': {},
     './ticket-screenshots.component': {},
+    './toast-feedback.directive': {},
     '../../core/services/ticket-screenshots.service': {},
   });
   return {
@@ -356,6 +357,23 @@ test('creating related projects and members retains the ticket draft and selects
     'new-member',
     'cancelling must not clear the current responsible',
   );
+});
+
+test('ticket delivery version is saved, trimmed, cleared and validated', async () => {
+  const { editor, saved } = makeEditor({ kind: 'ticket', projectId: 'project-1' });
+  editor.model.title = 'Versionado';
+  editor.model.target_version = ' 1.2.0-beta.1 ';
+  await editor.save();
+  assert.equal(saved[0].entity.target_version, '1.2.0-beta.1');
+  editor.model.target_version = '';
+  await editor.save();
+  assert.equal(saved[1].entity.target_version, null);
+  for (const invalid of ['x'.repeat(41), 'versión con espacios', '<script>']) {
+    editor.model.target_version = invalid;
+    await editor.save();
+    assert.match(editor.error, /versión admite/);
+  }
+  assert.equal(saved.length, 2);
 });
 
 test('project and member editors return their saved entities to the ticket form', async () => {

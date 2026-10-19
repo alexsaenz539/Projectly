@@ -123,16 +123,16 @@
       <p class="helper" role="status">Preparando imagen…</p>
     }
     @if (error()) {
-      <p class="form-error" role="alert">{{ error() }}</p>
+      <p class="form-error" role="alert" [appToastFeedback]="error()">{{ error() }}</p>
     }
     @if (profile.imageError()) {
-      <p class="form-error" role="alert">{{ profile.imageError() }}</p>
+      <p class="form-error" role="alert" [appToastFeedback]="profile.imageError()">{{ profile.imageError() }}</p>
     }
     @if (profile.warning()) {
-      <p class="notice" role="status">{{ profile.warning() }}</p>
+      <p class="notice" role="status" [appToastFeedback]="profile.warning()" toastKind="warning">{{ profile.warning() }}</p>
     }
     @if (success()) {
-      <p class="notice" role="status">{{ success() }}</p>
+      <p class="notice" role="status" [appToastFeedback]="success()" toastKind="success">{{ success() }}</p>
     }
     @if (profile.auth.isDemo) {
       <p class="helper">En demostración, el perfil y la foto se guardan solo en este navegador.</p>

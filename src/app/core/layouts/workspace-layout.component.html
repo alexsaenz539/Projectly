@@ -81,7 +81,7 @@
     </aside>
     <main class="main" id="main">
       @if (store.error()) {
-        <div class="notice mb-4" role="alert">
+        <div class="notice mb-4" role="alert" [appToastFeedback]="store.error()">
           {{ store.error() }} <button class="btn" (click)="store.refresh()">Reintentar</button>
         </div>
       }
@@ -92,6 +92,4 @@
     </main>
   </div>
 </div>
-@if (store.toast()) {
-  <div class="toast" role="status" aria-live="polite">{{ store.toast() }}</div>
-}
+<span hidden [appToastFeedback]="store.toast()" [toastKind]="store.toastKind()"></span>

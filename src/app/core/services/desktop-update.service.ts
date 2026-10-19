@@ -16,7 +16,13 @@ export interface UpdateState {
   enabled: boolean;
   lastCheckedAt: string | null;
 }
+export interface InstalledRelease {
+  version: string;
+  changes: string[];
+}
 export interface DesktopBridge {
+  getInstalledRelease?(): Promise<InstalledRelease | null>;
+  acknowledgeInstalledRelease?(): Promise<void>;
   getUpdateState(): Promise<UpdateState>;
   checkForUpdates(): Promise<UpdateState>;
   installUpdate(): Promise<{ ok: boolean; message?: string }>;
@@ -38,6 +44,17 @@ export class DesktopUpdateService {
     ['checking', 'downloading', 'installing'].includes(this.state()?.status || ''),
   );
   private revision = 0;
+  async installedRelease(): Promise<InstalledRelease | null> {
+    try {
+      return (await this.bridge?.getInstalledRelease?.()) ?? null;
+    } catch {
+      this.error.set('No se pudieron consultar las novedades de esta versión.');
+      return null;
+    }
+  }
+  async acknowledgeInstalledRelease(): Promise<void> {
+    await this.bridge?.acknowledgeInstalledRelease?.();
+  }
   constructor() {
     if (!this.bridge) return;
     this.bridge.onUpdateState((state) =>

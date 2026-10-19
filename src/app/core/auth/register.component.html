@@ -113,7 +113,7 @@
       <button class="auth-submit" type="submit" [disabled]="busy()">
         {{ busy() ? 'Creando usuario…' : 'Crear usuario' }}<span aria-hidden="true">→</span>
       </button>
-      <p class="auth-error" role="alert" aria-live="polite" [hidden]="!message()">
+      <p class="auth-error" role="alert" aria-live="polite" [hidden]="!message()" [appToastFeedback]="message()">
         {{ message() }}
       </p>
     </form>
@@ -124,7 +124,7 @@
       </p>
     }
   } @else {
-    <section class="auth-success" role="status" aria-live="polite">
+    <section class="auth-success" role="status" aria-live="polite" appToastFeedback="Cuenta creada correctamente." toastKind="success">
       <span class="auth-success-mark" aria-hidden="true"></span>
       <h2 tabindex="-1">
         {{

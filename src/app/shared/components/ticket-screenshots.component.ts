@@ -6,6 +6,7 @@ import {
 } from '../../core/services/ticket-screenshots.service';
 import { SCREENSHOT_LIMIT, validateScreenshot } from '../../core/services/screenshot-validation';
 import { ImagePreviewComponent } from './image-preview.component';
+import { ToastFeedbackDirective } from './toast-feedback.directive';
 
 interface PendingScreenshot {
   id: string;
@@ -14,7 +15,7 @@ interface PendingScreenshot {
 }
 
 @Component({
-  imports: [],
+  imports: [ToastFeedbackDirective],
   selector: 'app-ticket-screenshots',
   styleUrl: './ticket-screenshots.component.css',
   templateUrl: './ticket-screenshots.component.html',

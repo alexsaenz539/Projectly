@@ -36,6 +36,7 @@
             {{ store.member(t.assignee)?.name || 'Sin asignar' }}</span
           >
           <div class="mt-3"><app-badge [value]="t.priority" /></div>
+          <span class="subline">Versión de entrega: {{ t.target_version || 'Sin versión' }}</span>
         </article>
       }
       @if (!tickets(status).length) {

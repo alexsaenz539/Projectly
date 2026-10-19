@@ -8,6 +8,7 @@ import { BadgeComponent } from './badge.component';
   selector: 'app-ticket-table',
   imports: [DatePipe, BadgeComponent],
   templateUrl: './ticket-table.component.html',
+  styleUrl: './ticket-table.component.css',
 })
 export class TicketTableComponent {
   readonly tickets = input.required<Ticket[]>();

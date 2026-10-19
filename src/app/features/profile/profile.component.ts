@@ -6,9 +6,10 @@ import { InitialsPipe } from '../../shared/pipes/initials.pipe';
 import { ProfileService } from '../../core/services/profile.service';
 import { PROFILE_AVATARS, presetAvatar, profileErrors } from '../../core/services/profile-model';
 import { prepareProfilePhoto } from '../../core/services/profile-photo';
+import { ToastFeedbackDirective } from '../../shared/components/toast-feedback.directive';
 
 @Component({
-  imports: [FormsModule, FormControlsModule, PageHeaderComponent, InitialsPipe],
+  imports: [FormsModule, FormControlsModule, PageHeaderComponent, InitialsPipe, ToastFeedbackDirective],
   selector: 'app-profile',
   styleUrl: './profile.component.css',
   templateUrl: './profile.component.html',

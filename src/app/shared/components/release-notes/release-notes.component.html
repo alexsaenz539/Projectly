@@ -1,0 +1,19 @@
+<section class="dialog release-notes">
+  <header class="dialog-head">
+    <div>
+      <p class="release-version">Projectly · Versión {{ release.version }}</p>
+      <h2 id="release-notes-title">Novedades de esta versión</h2>
+    </div>
+  </header>
+  <div class="dialog-body">
+    <p>Ya tienes instalada esta versión. Estos son los cambios incluidos:</p>
+    <ul>
+      @for (change of release.changes; track $index) {
+        <li>{{ change }}</li>
+      }
+    </ul>
+  </div>
+  <footer class="form-actions">
+    <button class="btn btn-primary" type="button" (click)="ref.close()">Entendido</button>
+  </footer>
+</section>

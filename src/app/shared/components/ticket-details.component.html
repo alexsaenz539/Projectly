@@ -12,6 +12,7 @@
     <div><dt>Proyecto</dt><dd>{{ store.project(ticket.project_id)?.name || 'Proyecto no disponible' }}</dd></div>
     <div><dt>Responsable</dt><dd>{{ store.member(ticket.assignee)?.name || 'Sin asignar' }}</dd></div>
     <div><dt>Tipo</dt><dd>{{ ticket.type }}</dd></div>
+    <div><dt>Versión de entrega</dt><dd>{{ ticket.target_version || 'Sin versión' }}</dd></div>
     <div><dt>Vencimiento</dt><dd>{{ ticket.due ? (ticket.due | date: 'dd/MM/yyyy') : 'Sin fecha' }}</dd></div>
     <div class="ticket-detail-sprint"><dt>Sprint</dt><dd>{{ sprintName }}</dd></div>
   </dl>

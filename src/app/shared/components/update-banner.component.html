@@ -41,3 +41,7 @@
     </aside>
   }
 }
+<span hidden [appToastFeedback]="updates.error()"></span>
+@if (updates.state(); as state) {
+  <span hidden [appToastFeedback]="state.status === 'error' ? state.message : ''"></span>
+}

@@ -89,7 +89,7 @@
     </p>
   }
   @if (error()) {
-    <p class="form-error" role="alert">{{ error() }}</p>
+    <p class="form-error" role="alert" [appToastFeedback]="error()">{{ error() }}</p>
   }
   @if (loadFailed()) {
     <button type="button" class="btn" [disabled]="busy()" (click)="load()">Reintentar carga</button>

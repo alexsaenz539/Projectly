@@ -1,0 +1,11 @@
+.ticket-row {
+  cursor: pointer;
+}
+.ticket-row:hover,
+.ticket-row:focus-within {
+  background: var(--surface-muted);
+}
+.ticket-row:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}

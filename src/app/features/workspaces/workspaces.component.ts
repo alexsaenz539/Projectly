@@ -17,9 +17,10 @@ import {
 } from '../../shared/components/confirm-dialog.component';
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { IconComponent } from '../../shared/components/icon.component';
+import { ToastFeedbackDirective } from '../../shared/components/toast-feedback.directive';
 @Component({
   selector: 'app-workspaces',
-  imports: [FormsModule, PageHeaderComponent, IconComponent],
+  imports: [FormsModule, PageHeaderComponent, IconComponent, ToastFeedbackDirective],
   templateUrl: './workspaces.component.html',
   styleUrl: './workspaces.component.css',
 })

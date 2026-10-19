@@ -42,6 +42,7 @@ export interface Ticket {
   assignee: string | null;
   due: string | null;
   sprint_id: string | null;
+  target_version?: string | null;
 }
 export interface Notice {
   id: string;

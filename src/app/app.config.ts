@@ -1,4 +1,5 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, ErrorHandler, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { SystemErrorHandler } from './core/services/system-error-handler';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { LOCALE_ID, importProvidersFrom } from '@angular/core';
@@ -39,6 +40,7 @@ registerLocaleData(es);
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    { provide: ErrorHandler, useClass: SystemErrorHandler },
     provideRouter(routes),
     { provide: LOCALE_ID, useValue: 'es' },
     importProvidersFrom(DialogModule),

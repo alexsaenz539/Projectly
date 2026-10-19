@@ -9,6 +9,7 @@ import { SearchDialogComponent } from '../../shared/components/search-dialog.com
 import { BrandLogoComponent } from '../../shared/components/brand-logo.component';
 import { WorkspaceSwitcherComponent } from '../../shared/components/workspace-switcher.component';
 import { ProfileService } from '../services/profile.service';
+import { ToastFeedbackDirective } from '../../shared/components/toast-feedback.directive';
 @Component({
   selector: 'app-workspace-layout',
   imports: [
@@ -19,6 +20,7 @@ import { ProfileService } from '../services/profile.service';
     InitialsPipe,
     BrandLogoComponent,
     WorkspaceSwitcherComponent,
+    ToastFeedbackDirective,
   ],
   templateUrl: './workspace-layout.component.html',
 })
@@ -83,7 +85,7 @@ export class WorkspaceLayoutComponent {
       await this.store.auth.signOut();
       await this.router.navigate(['/login']);
     } catch {
-      this.store.notify('No se pudo cerrar la sesión.');
+      this.store.notify('No se pudo cerrar la sesión.', 'error');
     }
   }
 }

@@ -4,9 +4,10 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from './auth.service';
 import { AuthShellComponent } from './auth-shell.component';
 import { emailError, passwordError } from './auth-validation';
+import { ToastFeedbackDirective } from '../../shared/components/toast-feedback.directive';
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, RouterLink, AuthShellComponent],
+  imports: [FormsModule, RouterLink, AuthShellComponent, ToastFeedbackDirective],
   templateUrl: './login.component.html',
 })
 export class LoginComponent {

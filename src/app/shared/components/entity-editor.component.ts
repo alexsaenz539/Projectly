@@ -17,6 +17,7 @@ import { IconComponent } from './icon.component';
 import { FormControlsModule } from './form-controls.module';
 import { TicketScreenshotsComponent } from './ticket-screenshots.component';
 import { TicketScreenshotsService } from '../../core/services/ticket-screenshots.service';
+import { ToastFeedbackDirective } from './toast-feedback.directive';
 export interface EditorData {
   kind: 'ticket' | 'project' | 'sprint' | 'member';
   entity?: Entity;
@@ -24,7 +25,7 @@ export interface EditorData {
 }
 @Component({
   selector: 'app-entity-editor',
-  imports: [FormsModule, IconComponent, FormControlsModule, TicketScreenshotsComponent],
+  imports: [FormsModule, IconComponent, FormControlsModule, TicketScreenshotsComponent, ToastFeedbackDirective],
   templateUrl: './entity-editor.component.html',
 })
 export class EntityEditorComponent {
@@ -63,6 +64,7 @@ export class EntityEditorComponent {
     assignee: this.store.myMemberId(),
     due: day(2),
     sprint_id: '',
+    target_version: '',
     goal: '',
     start: day(),
     end: day(14),
@@ -121,6 +123,11 @@ export class EntityEditorComponent {
         this.error = 'Escribe un título.';
         return;
       }
+      const targetVersion = m['target_version'].trim();
+      if (targetVersion && !/^[A-Za-z0-9][A-Za-z0-9.+_-]{0,39}$/.test(targetVersion)) {
+        this.error = 'La versión admite hasta 40 letras, números, puntos, guiones o guiones bajos; sin espacios.';
+        return;
+      }
       if (m['sprint_id'] && !this.availableSprints.some((s) => s.id === m['sprint_id'])) {
         this.error = 'El sprint debe pertenecer al proyecto seleccionado.';
         return;
@@ -143,6 +150,7 @@ export class EntityEditorComponent {
         assignee: m['assignee'] || null,
         due: m['due'] || null,
         sprint_id: m['sprint_id'] || null,
+        target_version: targetVersion || null,
       };
       this.saving.set(true);
       const disableClose = this.ref.disableClose;
@@ -240,6 +248,7 @@ export class EntityEditorComponent {
         } catch {
           this.store.notify(
             'Ticket eliminado. No se pudieron limpiar sus capturas; revisa el bucket.',
+            'warning',
           );
         }
         this.ref.close();

@@ -54,7 +54,7 @@
     <button class="auth-submit" type="submit" [disabled]="busy()">
       {{ busy() ? 'Entrando…' : 'Iniciar sesión' }}<span aria-hidden="true">→</span>
     </button>
-    <p class="auth-error" role="alert" aria-live="polite" [hidden]="!message()">{{ message() }}</p>
+    <p class="auth-error" role="alert" aria-live="polite" [hidden]="!message()" [appToastFeedback]="message()">{{ message() }}</p>
   </form>
   <p class="auth-switch">¿Aún no tienes acceso? <a routerLink="/register">Crear usuario</a></p>
   @if (auth.isDemo) {

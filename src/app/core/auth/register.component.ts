@@ -4,9 +4,10 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from './auth.service';
 import { AuthShellComponent } from './auth-shell.component';
 import { registrationErrors } from './auth-validation';
+import { ToastFeedbackDirective } from '../../shared/components/toast-feedback.directive';
 @Component({
   selector: 'app-register',
-  imports: [FormsModule, RouterLink, AuthShellComponent],
+  imports: [FormsModule, RouterLink, AuthShellComponent, ToastFeedbackDirective],
   templateUrl: './register.component.html',
 })
 export class RegisterComponent {

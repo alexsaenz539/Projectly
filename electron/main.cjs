@@ -5,6 +5,7 @@ const path = require('node:path');
 const { existsSync, mkdirSync } = require('node:fs');
 const { pathToFileURL } = require('node:url');
 const { createUpdateController } = require('./update-controller.cjs');
+const { createReleaseNotes } = require('./release-notes.cjs');
 const { resolveAsset, trustedSender } = require('./security.cjs');
 const { releaseType, ...feed } = require('./updates.config.json');
 const dev = !app.isPackaged && process.argv.includes('--dev');
@@ -72,6 +73,14 @@ else {
       secureHandle('updates:state', () => controller.state());
       secureHandle('updates:check', () => controller.check());
       secureHandle('updates:install', () => controller.install());
+      const releaseNotes = createReleaseNotes({
+        version: app.getVersion(),
+        enabled: app.isPackaged,
+        file: path.join(app.getPath('userData'), 'release-notes-seen.json'),
+        notes: require('./release-notes.json'),
+      });
+      secureHandle('updates:release-notes', () => releaseNotes.pending());
+      secureHandle('updates:release-notes-read', () => releaseNotes.acknowledge());
       await controller.start();
       async function createWindow() {
         window = new BrowserWindow({

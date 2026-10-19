@@ -1,0 +1,13 @@
+{
+  "0.1.5": [
+    "Nuevo módulo Mi perfil para editar tu nombre y biografía.",
+    "Personaliza tu imagen con una foto propia, cuatro avatares predeterminados o tus iniciales.",
+    "Accede a tu perfil desde el avatar del encabezado o desde Administración."
+  ],
+  "0.1.6": [
+    "Consulta las novedades al abrir una versión recién instalada.",
+    "Avisos del sistema unificados con toasts de error, confirmación, advertencia e información.",
+    "Asigna una versión de entrega a tus tickets y consúltala en la tabla y los detalles.",
+    "Abre los tickets haciendo clic en cualquier parte de su fila."
+  ]
+}

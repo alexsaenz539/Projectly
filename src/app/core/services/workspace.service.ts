@@ -39,6 +39,7 @@ export class WorkspaceService {
   readonly busy = signal(false);
   readonly error = signal('');
   readonly toast = signal('');
+  readonly toastKind = signal<'success' | 'error' | 'warning' | 'info'>('info');
   readonly projects = computed(() => this.data().projects);
   readonly tickets = computed(() => this.data().tickets);
   readonly members = computed(() => this.data().members);
@@ -112,7 +113,7 @@ export class WorkspaceService {
         )
         .subscribe((status) => {
           if (status === 'CHANNEL_ERROR' && this.auth.user()?.id === user.id)
-            this.notify('No se pudo conectar Realtime. Puedes recargar los datos.');
+            this.notify('No se pudo conectar Realtime. Puedes recargar los datos.', 'warning');
         });
     });
     effect(() => {
@@ -122,7 +123,7 @@ export class WorkspaceService {
       try {
         localStorage.setItem(PREF_KEY, JSON.stringify(prefs));
       } catch {
-        this.notify('No se pudo guardar la preferencia en este navegador.');
+        this.notify('No se pudo guardar la preferencia en este navegador.', 'error');
       }
     });
   }
@@ -218,7 +219,7 @@ export class WorkspaceService {
       this.activate(id, data);
       return true;
     } catch (error) {
-      this.notify(this.message(error));
+      this.notify(this.message(error), 'error');
       return false;
     }
   }
@@ -258,7 +259,7 @@ export class WorkspaceService {
         record,
       ]);
       this.activate(record.id, structuredClone(EMPTY_WORKSPACE));
-      this.notify('Espacio creado. Ya puedes añadir tu primer proyecto.');
+      this.notify('Espacio creado. Ya puedes añadir tu primer proyecto.', 'success');
       return record;
     } catch (error) {
       throw new Error(this.message(error));
@@ -309,7 +310,7 @@ export class WorkspaceService {
             : space,
         ),
       );
-      this.notify('Espacio actualizado.');
+      this.notify('Espacio actualizado.', 'success');
     } catch (error) {
       throw new Error(this.message(error));
     } finally {
@@ -358,7 +359,7 @@ export class WorkspaceService {
       this.directoryLoading.set(false);
       this.workspaceDirectory.update((spaces) => spaces.filter((space) => space.id !== id));
       if (wasActive) this.activate(next?.id ?? null, nextData);
-      this.notify('Espacio y datos asociados eliminados.');
+      this.notify('Espacio y datos asociados eliminados.', 'success');
     } catch (error) {
       if (
         typeof error === 'object' &&
@@ -385,7 +386,8 @@ export class WorkspaceService {
   setPreference<K extends keyof Preferences>(key: K, value: Preferences[K]) {
     this.preferences.update((p) => ({ ...p, [key]: value }));
   }
-  notify(message: string) {
+  notify(message: string, kind: 'success' | 'error' | 'warning' | 'info' = 'info') {
+    this.toastKind.set(kind);
     clearTimeout(this.toastTimer);
     this.toast.set(message);
     this.toastTimer = setTimeout(() => this.toast.set(''), 4500);
@@ -481,10 +483,10 @@ export class WorkspaceService {
           },
         ];
       this.commit(next);
-      this.notify(this.auth.isDemo ? 'Cambios guardados en este navegador.' : 'Cambios guardados.');
+      this.notify(this.auth.isDemo ? 'Cambios guardados en este navegador.' : 'Cambios guardados.', 'success');
       return true;
     } catch (error) {
-      this.notify(this.message(error));
+      this.notify(this.message(error), 'error');
       return false;
     } finally {
       this.busy.set(false);
@@ -508,10 +510,10 @@ export class WorkspaceService {
       }
       if (generation !== this.generation) return false;
       this.commit({ ...this.data(), tickets: this.tickets().filter((t) => t.id !== id) });
-      this.notify('Ticket eliminado.');
+      this.notify('Ticket eliminado.', 'success');
       return true;
     } catch (error) {
-      this.notify(this.message(error));
+      this.notify(this.message(error), 'error');
       return false;
     } finally {
       this.busy.set(false);
@@ -524,7 +526,7 @@ export class WorkspaceService {
     if (!this.isSampleWorkspace()) return;
     this.commit(sampleWorkspace());
     this.setPreference('myMemberId', '');
-    this.notify('Datos de demostración restablecidos.');
+    this.notify('Datos de demostración restablecidos.', 'success');
   }
   private commit(next: Workspace) {
     if (this.local) this.local.write(this.activeWorkspaceId()!, next);

@@ -5,6 +5,7 @@
         <tr>
           <th>Ticket</th>
           <th>Proyecto</th>
+          <th>Versión de entrega</th>
           <th>Estado</th>
           <th>Prioridad</th>
           <th>Responsable</th>
@@ -13,12 +14,13 @@
       </thead>
       <tbody>
         @for (t of tickets(); track t.id) {
-          <tr>
+          <tr class="ticket-row" (click)="editor.open('ticket', t)">
             <td class="title-cell">
-              <button class="text-link" (click)="editor.open('ticket', t)">{{ t.title }}</button
+              <button type="button" class="text-link" [attr.aria-label]="'Abrir ticket ' + t.key + ': ' + t.title" (click)="$event.stopPropagation(); editor.open('ticket', t)">{{ t.title }}</button
               ><span class="subline mono">{{ t.key }}</span>
             </td>
             <td>{{ store.project(t.project_id)?.name }}</td>
+            <td>{{ t.target_version || 'Sin versión' }}</td>
             <td><app-badge [value]="t.status" /></td>
             <td><app-badge [value]="t.priority" /></td>
             <td>{{ store.member(t.assignee)?.name || 'Sin asignar' }}</td>

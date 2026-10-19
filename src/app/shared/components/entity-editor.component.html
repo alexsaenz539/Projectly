@@ -100,6 +100,11 @@
         </div>
       }
       @if (data.kind === 'ticket') {
+        <div class="form-row">
+          <label for="target-version">Versión de entrega</label>
+          <input id="target-version" name="target_version" maxlength="40" placeholder="Ej. 0.1.6 o 1.0.0-beta.1" [(ngModel)]="model['target_version']" aria-describedby="target-version-help" />
+          <p id="target-version-help" class="helper">Versión del producto en la que se entregará. Déjalo vacío si aún no está definida.</p>
+        </div>
         <div class="grid grid-cols-2">
           <div class="form-row">
             <label for="type">Tipo</label
@@ -244,7 +249,7 @@
         </p>
       }
       @if (error) {
-        <p class="form-error" role="alert">{{ error }}</p>
+        <p class="form-error" role="alert" [appToastFeedback]="error">{{ error }}</p>
       }
       @if (confirmDelete) {
         <div class="notice">
