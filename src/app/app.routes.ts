@@ -100,6 +100,12 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'profile',
+        title: 'Mi perfil · Projectly',
+        loadComponent: () =>
+          import('./features/profile/profile.component').then((m) => m.ProfileComponent),
+      },
+      {
         path: 'settings',
         title: 'Configuración · Projectly',
         loadComponent: () =>

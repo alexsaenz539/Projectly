@@ -1,7 +1,7 @@
 import { Injector, inject } from '@angular/core';
 import { CanActivateChildFn, Router } from '@angular/router';
 export const workspaceGuard: CanActivateChildFn = async (route) => {
-  if (['workspaces', 'settings'].includes(route.routeConfig?.path ?? '')) return true;
+  if (['workspaces', 'settings', 'profile'].includes(route.routeConfig?.path ?? '')) return true;
   const injector = inject(Injector),
     router = inject(Router);
   const { WorkspaceService } = await import('../services/workspace.service');

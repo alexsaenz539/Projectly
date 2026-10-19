@@ -36,9 +36,18 @@
             <span class="notification-dot"></span>
           }
         </a>
-        <a class="avatar" routerLink="/settings" [attr.aria-label]="store.myName()">{{
-          store.myName() | initials
-        }}</a>
+        <a
+          class="avatar profile-header-avatar"
+          routerLink="/profile"
+          [attr.aria-label]="'Mi perfil: ' + profile.displayName()"
+          [title]="profile.displayName()"
+        >
+          @if (profile.image()) {
+            <img [src]="profile.image()" alt="" />
+          } @else {
+            {{ profile.displayName() | initials }}
+          }
+        </a>
       </div>
     </header>
     <aside class="sidebar" aria-label="Navegación principal">

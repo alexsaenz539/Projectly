@@ -1,0 +1,158 @@
+<app-page-header
+  title="Mi perfil"
+  eyebrow="Cuenta personal"
+  subtitle="Tu nombre, tu imagen y un poco sobre ti. En todos tus espacios."
+/>
+<div class="profile-layout">
+  <aside class="card profile-summary" aria-label="Vista previa del perfil">
+    <div class="profile-portrait" aria-hidden="true">
+      @if (preview) {
+        <img [src]="preview" alt="" />
+      } @else {
+        <span>{{ name || profile.displayName() | initials }}</span>
+      }
+    </div>
+    <h2>{{ name.trim() || 'Tu nombre' }}</h2>
+    <p class="profile-email">{{ profile.auth.user()?.email || 'Cuenta de demostración' }}</p>
+    @if (bio.trim()) {
+      <p class="profile-bio">{{ bio }}</p>
+    }
+    <span class="profile-caption">Vista previa · Los cambios se aplican al guardar</span>
+  </aside>
+  <form
+    class="card profile-form"
+    #form="ngForm"
+    (ngSubmit)="save()"
+    [attr.aria-busy]="profile.busy() || processing()"
+  >
+    <fieldset [disabled]="profile.busy() || processing()">
+      <legend>Información personal</legend>
+      <p class="helper">Tu perfil de cuenta no modifica los responsables de tus proyectos.</p>
+      <div class="form-row">
+        <label for="profile-name">Nombre visible <span aria-hidden="true">*</span></label>
+        <input
+          id="profile-name"
+          name="name"
+          autocomplete="name"
+          [(ngModel)]="name"
+          required
+          maxlength="80"
+          #nameControl="ngModel"
+          (ngModelChange)="success.set('')"
+        />
+        @if (nameControl.invalid && nameControl.touched) {
+          <span class="form-error">Escribe tu nombre.</span>
+        }
+      </div>
+      <div class="form-row">
+        <label for="profile-bio">Biografía <span class="helper">(opcional)</span></label>
+        <textarea
+          id="profile-bio"
+          name="bio"
+          [(ngModel)]="bio"
+          rows="3"
+          maxlength="280"
+          aria-describedby="profile-bio-help"
+          (ngModelChange)="success.set('')"
+        ></textarea>
+        <span id="profile-bio-help" class="helper"
+          >Una breve presentación · {{ bio.length }}/280</span
+        >
+      </div>
+      <div class="form-row">
+        <label for="profile-email">Correo electrónico</label>
+        <input
+          id="profile-email"
+          type="text"
+          [value]="profile.auth.user()?.email || 'Modo demostración'"
+          readonly
+          aria-describedby="profile-email-help"
+        />
+        <span class="helper" id="profile-email-help"
+          >El correo de acceso no se modifica desde este formulario.</span
+        >
+      </div>
+    </fieldset>
+    <fieldset class="profile-avatar-section" [disabled]="profile.busy() || processing()">
+      <legend>Imagen de perfil</legend>
+      <p class="helper" id="profile-photo-help">
+        Sube una imagen PNG, JPG o WebP de hasta 5 MB. Se recortará al centro en formato cuadrado.
+      </p>
+      <div class="profile-photo-actions">
+        <button
+          class="btn"
+          type="button"
+          (click)="photoInput.click()"
+          aria-describedby="profile-photo-help"
+        >
+          Subir imagen
+        </button>
+        <input
+          #photoInput
+          class="profile-file"
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          aria-label="Seleccionar imagen de perfil"
+          (change)="selectPhoto($event)"
+        />
+        @if (avatar !== '') {
+          <button class="btn btn-quiet" type="button" (click)="choose('')">
+            Usar mis iniciales
+          </button>
+        }
+      </div>
+      <p class="profile-presets-label" id="profile-presets-label">
+        O elige un avatar predeterminado
+      </p>
+      <div class="profile-presets" role="group" aria-labelledby="profile-presets-label">
+        @for (item of avatars; track item.id) {
+          <button
+            class="profile-preset"
+            type="button"
+            [attr.aria-pressed]="avatar === item.id"
+            (click)="choose(item.id)"
+          >
+            <img [src]="item.url" alt="" width="56" height="56" />
+            <span>{{ item.name }}</span>
+            <span class="profile-selection">{{ avatar === item.id ? 'Elegido' : 'Elegir' }}</span>
+          </button>
+        }
+      </div>
+    </fieldset>
+    @if (processing()) {
+      <p class="helper" role="status">Preparando imagen…</p>
+    }
+    @if (error()) {
+      <p class="form-error" role="alert">{{ error() }}</p>
+    }
+    @if (profile.imageError()) {
+      <p class="form-error" role="alert">{{ profile.imageError() }}</p>
+    }
+    @if (profile.warning()) {
+      <p class="notice" role="status">{{ profile.warning() }}</p>
+    }
+    @if (success()) {
+      <p class="notice" role="status">{{ success() }}</p>
+    }
+    @if (profile.auth.isDemo) {
+      <p class="helper">En demostración, el perfil y la foto se guardan solo en este navegador.</p>
+    }
+    <footer class="profile-actions">
+      <button
+        class="btn"
+        type="button"
+        (click)="reset()"
+        [disabled]="profile.busy() || processing() || !dirty"
+      >
+        Descartar cambios
+      </button>
+      <button
+        class="btn btn-primary"
+        type="submit"
+        [disabled]="form.invalid || !name.trim() || profile.busy() || processing() || !dirty"
+      >
+        {{ profile.busy() ? 'Guardando…' : 'Guardar perfil' }}
+      </button>
+    </footer>
+  </form>
+</div>

@@ -8,6 +8,7 @@ import { InitialsPipe } from '../../shared/pipes/initials.pipe';
 import { SearchDialogComponent } from '../../shared/components/search-dialog.component';
 import { BrandLogoComponent } from '../../shared/components/brand-logo.component';
 import { WorkspaceSwitcherComponent } from '../../shared/components/workspace-switcher.component';
+import { ProfileService } from '../services/profile.service';
 @Component({
   selector: 'app-workspace-layout',
   imports: [
@@ -23,6 +24,7 @@ import { WorkspaceSwitcherComponent } from '../../shared/components/workspace-sw
 })
 export class WorkspaceLayoutComponent {
   readonly store = inject(WorkspaceService);
+  readonly profile = inject(ProfileService);
   readonly editor = inject(EditorService);
   private readonly dialog = inject(Dialog);
   private readonly router = inject(Router);
@@ -40,6 +42,7 @@ export class WorkspaceLayoutComponent {
     { path: '/reports', name: 'Reportes', icon: 'chart-no-axes-combined', group: 'Administración' },
     { path: '/notifications', name: 'Notificaciones', icon: 'bell', group: 'Administración' },
     { path: '/settings', name: 'Configuración', icon: 'settings', group: 'Administración' },
+    { path: '/profile', name: 'Mi perfil', icon: 'users', group: 'Administración' },
   ];
   constructor() {
     effect(() => {

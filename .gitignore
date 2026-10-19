@@ -44,3 +44,7 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+environment.ts
+
+# Local environment configuration
+/src/environments/
