@@ -9,5 +9,17 @@
     "Avisos del sistema unificados con toasts de error, confirmación, advertencia e información.",
     "Asigna una versión de entrega a tus tickets y consúltala en la tabla y los detalles.",
     "Abre los tickets haciendo clic en cualquier parte de su fila."
+  ],
+  "0.1.7": [
+    "Filtra el tablero por ID o título, proyecto, responsable, prioridad y versión de entrega.",
+    "Identifica al responsable por su imagen de perfil y consulta su nombre al pasar el cursor o usar el teclado.",
+    "Vincula responsables con cuentas de correo confirmado para mostrar su foto y asignarles tickets.",
+    "Usa Asignarme a mí para seleccionar tu cuenta al crear o editar un ticket.",
+    "Detalles de tickets más claros, con clave y título separados por un guion y sin la etiqueta Solo lectura.",
+    "Avisos más compactos, con iconos de estado y barra de tiempo.",
+    "Nueva plantilla de correo de confirmación con la identidad de Projectly, adaptable a móvil y modo oscuro; requiere activación en Supabase."
+  ],
+  "0.1.8": [
+    "El tablero Kanban consulta automáticamente los cambios cada 30 segundos mientras está visible, sin perder los filtros ni interrumpir el arrastre."
   ]
 }

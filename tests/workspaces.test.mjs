@@ -54,7 +54,7 @@ const local = compile('src/app/core/services/local-workspaces.ts', {
   './workspace-record': record,
 });
 const empty = () => structuredClone(local.EMPTY_WORKSPACE);
-function makeStore(storage, client = null) {
+function makeStore(storage, client = null, globals = {}) {
   const effects = [];
   class AuthService {}
   const user = { id: 'account-a' };
@@ -93,12 +93,93 @@ function makeStore(storage, client = null) {
       './workspace-record': record,
       './local-workspaces': local,
     },
-    { localStorage: storage },
+    { localStorage: storage, ...globals },
   );
   const store = new WorkspaceService();
   store.flushAuthEffect = () => effects[0]();
   return store;
 }
+
+function pollingStore() {
+  const listeners = new Map();
+  const document = { visibilityState: 'visible', addEventListener: (name, fn) => listeners.set(name, fn), removeEventListener: name => listeners.delete(name) };
+  const window = { addEventListener: (name, fn) => listeners.set(name, fn), removeEventListener: name => listeners.delete(name) };
+  const navigator = { onLine: true };
+  let tick, cleared = false;
+  const store = makeStore(new MemoryStorage(), {}, {
+    document, window, navigator,
+    setInterval: (fn, ms) => { assert.equal(ms, 30_000); tick = fn; return 7; },
+    clearInterval: id => { assert.equal(id, 7); cleared = true; },
+  });
+  store.workspaceDirectory.set([{ id: 'space', name: 'Espacio' }]);
+  store.activeWorkspaceId.set('space');
+  return { store, document, navigator, listeners, tick: () => tick(), cleared: () => cleared };
+}
+
+test('automatic refresh polls every 30 seconds, pauses safely and cleans up listeners', async () => {
+  const { store, document, navigator, listeners, tick, cleared } = pollingStore();
+  let calls = 0, paused = false, finish;
+  store.refresh = async (_generation, background, canApply) => {
+    assert.equal(background, true);
+    assert.equal(canApply(), true);
+    calls++;
+    await new Promise(resolve => { finish = resolve; });
+  };
+  const stop = store.startTicketAutoRefresh(() => paused);
+  tick(); tick();
+  assert.equal(calls, 1);
+  finish(); await new Promise(resolve => setImmediate(resolve));
+  paused = true; tick(); paused = false;
+  store.busy.set(true); tick(); store.busy.set(false);
+  store.spaceBusy.set(true); tick(); store.spaceBusy.set(false);
+  store.loading.set(true); tick(); store.loading.set(false);
+  document.visibilityState = 'hidden'; tick();
+  document.visibilityState = 'visible';
+  navigator.onLine = false; tick(); navigator.onLine = true;
+  assert.equal(calls, 1);
+  listeners.get('online')();
+  assert.equal(calls, 2);
+  finish(); await new Promise(resolve => setImmediate(resolve));
+  listeners.get('visibilitychange')();
+  assert.equal(calls, 3);
+  finish(); await new Promise(resolve => setImmediate(resolve));
+  stop(); tick();
+  assert.equal(calls, 3);
+  assert.equal(cleared(), true);
+  assert.equal(listeners.size, 0);
+});
+
+test('background refresh preserves content, avoids loading and drops paused or failed results', async () => {
+  const { store } = pollingStore();
+  let complete;
+  store.auth.client.from = () => ({ select: () => ({ eq: () => ({ eq: () => ({ order: () => new Promise(resolve => { complete.push(resolve); }) }) }) }) });
+  const previous = store.data();
+  complete = [];
+  let allowed = true;
+  const request = store.refresh(undefined, true, () => allowed);
+  assert.equal(store.loading(), false);
+  allowed = false;
+  complete.forEach(resolve => resolve({ data: [] }));
+  await request;
+  assert.equal(store.data(), previous);
+  complete = [];
+  const failed = store.refresh(undefined, true);
+  complete.forEach(resolve => resolve({ error: new Error('offline') }));
+  await failed;
+  assert.equal(store.data(), previous);
+  assert.equal(store.error(), '');
+  complete = [];
+  const success = store.refresh(undefined, true);
+  complete.forEach(resolve => resolve({ data: [] }));
+  await success;
+  assert.notEqual(store.data(), previous);
+});
+
+test('demo automatic refresh does not start timers or access the network', () => {
+  const store = makeStore(new MemoryStorage());
+  store.refresh = () => { throw new Error('No network in demo'); };
+  store.startTicketAutoRefresh(() => false)();
+});
 test('identifiers normalize accents and reject invalid or duplicate values', () => {
   assert.equal(record.workspaceSlug('  Área de Diseño y QA  '), 'area-de-diseno-y-qa');
   assert.ok(record.workspaceSlug('a'.repeat(100)).length <= 32);

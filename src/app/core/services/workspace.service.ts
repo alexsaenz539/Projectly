@@ -440,11 +440,38 @@ export class WorkspaceService {
       ? Math.round((rows.filter((t) => t.status === 'Completado').length / rows.length) * 100)
       : 0;
   }
-  async refresh(generation = this.generation) {
+  startTicketAutoRefresh(paused: () => boolean): () => void {
+    if (this.auth.isDemo) return () => {};
+    let stopped = false;
+    let pending = false;
+    const canRefresh = () => !stopped && !paused() &&
+      document.visibilityState === 'visible' && navigator.onLine &&
+      !this.busy() && !this.spaceBusy() && !this.loading();
+    const update = async () => {
+      if (pending || !canRefresh() || !this.client || !this.auth.user() || !this.hasWorkspace()) return;
+      pending = true;
+      try {
+        await this.refresh(this.generation, true, canRefresh);
+      } finally {
+        pending = false;
+      }
+    };
+    const resume = () => { void update(); };
+    const timer = setInterval(resume, 30_000);
+    document.addEventListener('visibilitychange', resume);
+    window.addEventListener('online', resume);
+    return () => {
+      stopped = true;
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', resume);
+      window.removeEventListener('online', resume);
+    };
+  }
+  async refresh(generation = this.generation, background = false, canApply = () => true) {
     if (!this.client || !this.auth.user() || !this.hasWorkspace()) return;
     const workspaceId = this.activeWorkspaceId()!;
     const userId = this.auth.user()!.id;
-    this.loading.set(true);
+    if (!background) this.loading.set(true);
     const dataVersion = this.dataVersion,
       refreshVersion = ++this.refreshVersion;
     try {
@@ -463,7 +490,8 @@ export class WorkspaceService {
         userId !== this.auth.user()?.id ||
         workspaceId !== this.activeWorkspaceId() ||
         dataVersion !== this.dataVersion ||
-        refreshVersion !== this.refreshVersion
+        refreshVersion !== this.refreshVersion ||
+        !canApply()
       )
         return;
       const failure = results.find((r) => r.error);
@@ -473,10 +501,10 @@ export class WorkspaceService {
       );
       this.error.set('');
     } catch (error) {
-      if (generation === this.generation && refreshVersion === this.refreshVersion)
+      if (!background && generation === this.generation && refreshVersion === this.refreshVersion)
         this.error.set(this.message(error));
     } finally {
-      if (generation === this.generation && refreshVersion === this.refreshVersion)
+      if (!background && generation === this.generation && refreshVersion === this.refreshVersion)
         this.loading.set(false);
     }
   }

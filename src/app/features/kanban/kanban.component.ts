@@ -1,4 +1,5 @@
-import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Dialog } from '@angular/cdk/dialog';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { WorkspaceService } from '../../core/services/workspace.service';
@@ -26,6 +27,8 @@ import { AssigneeAvatarComponent } from '../../shared/components/assignee-avatar
 export class KanbanComponent {
   readonly store = inject(WorkspaceService);
   readonly editor = inject(EditorService);
+  private readonly dialog = inject(Dialog);
+  readonly dragging = signal(false);
   readonly statuses = STATUSES;
   readonly priorities = PRIORITIES;
   readonly query = signal('');
@@ -73,6 +76,9 @@ export class KanbanComponent {
       );
   });
   constructor() {
+    inject(DestroyRef).onDestroy(this.store.startTicketAutoRefresh(
+      () => this.dragging() || this.dialog.openDialogs.length > 0,
+    ));
     effect(() => {
       this.store.activeWorkspaceId();
       untracked(() => this.clearFilters());

@@ -9,6 +9,9 @@
     <app-icon name="plus" />Crear ticket
   </button></app-page-header
 >
+@if (!store.auth.isDemo) {
+  <p class="helper">El tablero se actualiza automáticamente cada 30 segundos mientras está visible.</p>
+}
 <section class="kanban-filters" aria-label="Filtros del tablero Kanban">
   <div class="kanban-filter-fields">
     <div class="form-row">
@@ -88,7 +91,7 @@
         ><span class="kanban-count">{{ tickets(status).length }}</span>
       </div>
       @for (t of tickets(status); track t.id) {
-        <article class="kanban-card" cdkDrag [cdkDragData]="t">
+        <article class="kanban-card" cdkDrag [cdkDragData]="t" (cdkDragStarted)="dragging.set(true)" (cdkDragEnded)="dragging.set(false)">
           <div class="flex justify-between items-center">
             <span class="mono muted">{{ t.key }}</span
             ><button class="drag-handle" cdkDragHandle [attr.aria-label]="'Arrastrar ' + t.key">

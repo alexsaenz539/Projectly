@@ -65,23 +65,27 @@ function board() {
     },
   ];
   const moves = [];
+  let pauseRefresh, destroy;
   const store = {
     tickets: signal(tickets),
     activeWorkspaceId: signal('workspace-1'),
     moveTicket: (...args) => moves.push(args),
+    startTicketAutoRefresh: (paused) => { pauseRefresh = paused; return () => {}; },
   };
   const effects = [];
   const dependencies = {
     '@angular/core': {
       Component: () => (target) => target,
+      DestroyRef: 'destroy',
       computed: (fn) => fn,
       signal,
       effect: (fn) => effects.push(fn),
       untracked: (fn) => fn(),
-      inject: (token) => (token === 'workspace' ? store : {}),
+      inject: (token) => token === 'workspace' ? store : token === 'destroy' ? { onDestroy: fn => { destroy = fn; } } : token === 'dialog' ? { openDialogs: [] } : {},
     },
     '@angular/forms': {},
     '@angular/cdk/drag-drop': {},
+    '@angular/cdk/dialog': { Dialog: 'dialog' },
     '../../core/services/workspace.service': { WorkspaceService: 'workspace' },
     '../../core/services/editor.service': {},
     '../../core/services/models': {
@@ -115,8 +119,21 @@ function board() {
       },
     },
   );
-  return { component: new exports.KanbanComponent(), store, moves, effects };
+  return { component: new exports.KanbanComponent(), store, moves, effects, paused: () => pauseRefresh(), destroy: () => destroy() };
 }
+
+test('kanban pauses automatic updates during dragging and dialogs', () => {
+  const { component, paused, destroy } = board();
+  assert.equal(paused(), false);
+  component.dragging.set(true);
+  assert.equal(paused(), true);
+  component.dragging.set(false);
+  component.dialog.openDialogs.push({});
+  assert.equal(paused(), true);
+  component.dialog.openDialogs.length = 0;
+  assert.equal(paused(), false);
+  destroy();
+});
 
 const ids = (component) => Array.from(component.visible(), (ticket) => ticket.id);
 
