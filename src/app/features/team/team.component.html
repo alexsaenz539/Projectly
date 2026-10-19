@@ -10,10 +10,13 @@
   <div class="list-simple">
     @for (m of store.members(); track m.id) {
       <article class="list-row">
-        <div class="avatar">{{ m.name | initials }}</div>
+        <app-assignee-avatar [member]="m" />
         <div>
           <strong>{{ m.name }}</strong>
           <p>{{ m.email }} · {{ m.role }}</p>
+          @if (!store.auth.isDemo) {
+            <p class="helper">{{ m.account_id ? 'Cuenta vinculada' : 'Sin cuenta vinculada: no se le pueden asignar tickets nuevos' }}</p>
+          }
         </div>
         <span class="spacer"></span><span class="helper">{{ assigned(m.id) }} tickets</span
         ><button class="btn btn-quiet" (click)="editor.open('member', m)">Editar</button>
@@ -26,5 +29,8 @@
   </div>
 </section>
 <p class="helper mt-4">
-  El directorio no envía invitaciones ni comparte tu espacio. Los roles son etiquetas organizativas.
+  Usa el mismo correo con el que la persona se registró y confirmó su cuenta. Su imagen de perfil se mostrará en los tickets asignados. Añadirla al directorio no le concede acceso a los datos de tu espacio.
 </p>
+@if (profiles.error()) {
+  <p class="form-error" role="alert">{{ profiles.error() }}</p>
+}

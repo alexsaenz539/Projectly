@@ -37,6 +37,7 @@ export class EntityEditorComponent {
   private readonly screenshotService = inject(TicketScreenshotsService);
   readonly screenshots = viewChild(TicketScreenshotsComponent);
   readonly saving = signal(false);
+  readonly assigningSelf = signal(false);
   readonly workspaceId = this.store.activeWorkspaceId() ?? '';
   readonly ticketId = this.data.entity?.id ?? crypto.randomUUID();
   readonly statuses = STATUSES;
@@ -61,7 +62,7 @@ export class EntityEditorComponent {
           ? 'Planificado'
           : 'Activo',
     priority: 'Media',
-    assignee: this.store.myMemberId(),
+    assignee: this.store.canAssignMember(this.store.myMemberId()) ? this.store.myMemberId() : '',
     due: day(2),
     sprint_id: '',
     target_version: '',
@@ -76,6 +77,24 @@ export class EntityEditorComponent {
   };
   get availableSprints() {
     return this.store.sprints().filter((s) => s.project_id === this.model['project_id']);
+  }
+  async assignToMe(): Promise<void> {
+    if (this.assigningSelf() || this.saving() || this.store.busy()) return;
+    if (this.workspaceId !== this.store.activeWorkspaceId()) {
+      this.error = 'El espacio cambió. Cierra el formulario y vuelve a abrirlo.';
+      return;
+    }
+    this.error = '';
+    this.assigningSelf.set(true);
+    try {
+      const member = await this.store.ensureCurrentMember();
+      if (member && this.workspaceId === this.store.activeWorkspaceId()) this.model['assignee'] = member.id;
+      else this.error = 'No se pudo seleccionar tu cuenta. Comprueba que tu correo esté confirmado y vuelve a intentarlo.';
+    } catch {
+      this.error = 'No se pudo seleccionar tu cuenta. Vuelve a intentarlo.';
+    } finally {
+      this.assigningSelf.set(false);
+    }
   }
   projectChanged() {
     if (!this.availableSprints.some((s) => s.id === this.model['sprint_id']))
@@ -102,7 +121,7 @@ export class EntityEditorComponent {
       });
   }
   async save() {
-    if (this.saving() || this.store.busy()) return;
+    if (this.saving() || this.assigningSelf() || this.store.busy()) return;
     this.error = '';
     if (this.workspaceId !== this.store.activeWorkspaceId()) {
       this.error = 'El espacio cambió. Cierra el formulario y vuelve a abrirlo.';
@@ -124,6 +143,10 @@ export class EntityEditorComponent {
         return;
       }
       const targetVersion = m['target_version'].trim();
+      if (m['assignee'] && m['assignee'] !== (this.data.entity as Ticket | undefined)?.assignee && !this.store.canAssignMember(m['assignee'])) {
+        this.error = 'El responsable debe tener una cuenta registrada y un correo confirmado. Usa su correo de acceso al añadirlo al equipo.';
+        return;
+      }
       if (targetVersion && !/^[A-Za-z0-9][A-Za-z0-9.+_-]{0,39}$/.test(targetVersion)) {
         this.error = 'La versión admite hasta 40 letras, números, puntos, guiones o guiones bajos; sin espacios.';
         return;

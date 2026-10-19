@@ -146,9 +146,11 @@
           <select id="assignee" name="assignee" [(ngModel)]="model['assignee']">
             <option value="">Sin asignar</option>
             @for (m of store.members(); track m.id) {
-              <option [value]="m.id">{{ m.name }}</option>
+              <option [value]="m.id" [disabled]="!store.canAssignMember(m.id)">{{ m.name }}{{ store.canAssignMember(m.id) ? '' : ' — Sin cuenta vinculada' }}</option>
             }
           </select>
+          <p class="helper form-helper">Usa el correo de acceso del responsable para vincular su cuenta y mostrar su foto de perfil. En modo conectado, solo se puede asignar a cuentas confirmadas.</p>
+          <button type="button" class="text-link" [disabled]="store.busy() || saving() || assigningSelf()" (click)="assignToMe()">{{ assigningSelf() ? 'Seleccionando tu cuenta…' : 'Asignarme a mí' }}</button>
           @if (!store.members().length) {
             <p class="helper form-helper">
               Añade una persona al directorio para asignarle este ticket.
@@ -245,7 +247,7 @@
           </select>
         </div>
         <p class="helper">
-          Registro de tu directorio. No envía una invitación ni concede acceso a tu cuenta.
+          Introduce su correo de acceso a Projectly. Se vinculará con su cuenta confirmada para mostrar su foto y permitir asignarle tickets. No crea una cuenta ni concede acceso a los datos de tu espacio.
         </p>
       }
       @if (error) {
@@ -273,6 +275,7 @@
           [disabled]="
             store.busy() ||
             saving() ||
+            assigningSelf() ||
             screenshots()?.processing() ||
             ((data.kind === 'ticket' || data.kind === 'sprint') && !model['project_id'])
           "

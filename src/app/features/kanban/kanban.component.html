@@ -105,7 +105,7 @@
             </button></strong
           ><span class="subline"
             >{{ store.project(t.project_id)?.name }} ·
-            {{ store.member(t.assignee)?.name || 'Sin asignar' }}</span
+             <app-assignee-avatar [member]="store.member(t.assignee)" /></span
           >
           <div class="mt-3"><app-badge [value]="t.priority" /></div>
           <span class="subline">Versión de entrega: {{ t.target_version || 'Sin versión' }}</span>

@@ -283,6 +283,7 @@ function makeEditor(data = { kind: 'ticket' }) {
     tickets: () => [],
     activeWorkspaceId: () => 'space-1',
     busy: () => false,
+    canAssignMember: () => true,
     project: (id) => projects.find((project) => project.id === id),
     save: async (collection, entity) => {
       saved.push({ collection, entity });
@@ -319,6 +320,7 @@ function makeEditor(data = { kind: 'ticket' }) {
     './icon.component': {},
     './form-controls.module': {},
     './ticket-screenshots.component': {},
+    './assignee-avatar/assignee-avatar.component': {},
     './toast-feedback.directive': {},
     '../../core/services/ticket-screenshots.service': {},
   });
@@ -340,6 +342,37 @@ test('new tickets honor their project context and save the assigned responsible'
   assert.equal(saved[0].entity.project_id, 'project-1');
   assert.equal(saved[0].entity.assignee, 'member-1');
   assert.equal(closed.length, 1);
+});
+
+test('ticket editor rejects a new assignee without a registered account', async () => {
+  const { editor, saved } = makeEditor({ kind: 'ticket', projectId: 'project-1' });
+  editor.store.canAssignMember = () => false;
+  editor.model.title = 'Asignación';
+  editor.model.assignee = 'contact-without-account';
+  await editor.save();
+  assert.equal(saved.length, 0);
+  assert.match(editor.error, /cuenta registrada/);
+});
+
+test('assign to me selects the current user without saving the ticket or replacing the draft', async () => {
+  const { editor, saved } = makeEditor({ kind: 'ticket', projectId: 'project-1' });
+  editor.model.title = 'Conservar mi borrador';
+  editor.store.ensureCurrentMember = async () => ({ id: 'self-member' });
+  await editor.assignToMe();
+  assert.equal(editor.model.assignee, 'self-member');
+  assert.equal(editor.model.title, 'Conservar mi borrador');
+  assert.equal(saved.length, 0);
+  assert.equal(editor.assigningSelf(), false);
+});
+
+test('failed self-assignment keeps the previous responsible and resets the pending state', async () => {
+  const { editor } = makeEditor();
+  editor.model.assignee = 'previous';
+  editor.store.ensureCurrentMember = async () => undefined;
+  await editor.assignToMe();
+  assert.equal(editor.model.assignee, 'previous');
+  assert.match(editor.error, /No se pudo/);
+  assert.equal(editor.assigningSelf(), false);
 });
 
 test('creating related projects and members retains the ticket draft and selects the result', () => {

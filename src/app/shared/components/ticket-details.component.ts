@@ -7,9 +7,10 @@ import { WorkspaceService } from '../../core/services/workspace.service';
 import { BadgeComponent } from './badge.component';
 import { IconComponent } from './icon.component';
 import { TicketScreenshotsComponent } from './ticket-screenshots.component';
+import { AssigneeAvatarComponent } from './assignee-avatar/assignee-avatar.component';
 
 @Component({
-  imports: [DatePipe, BadgeComponent, IconComponent, TicketScreenshotsComponent],
+  imports: [DatePipe, BadgeComponent, IconComponent, TicketScreenshotsComponent, AssigneeAvatarComponent],
   selector: 'app-ticket-details',
   styleUrl: './ticket-details.component.css',
   templateUrl: './ticket-details.component.html',

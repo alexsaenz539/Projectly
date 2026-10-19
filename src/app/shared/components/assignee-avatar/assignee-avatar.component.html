@@ -1,0 +1,37 @@
+<span
+  class="assignee-avatar"
+  tabindex="0"
+  role="img"
+  [attr.aria-label]="'Responsable: ' + name()"
+  [attr.aria-describedby]="showTooltip() ? tooltipId : null"
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
+  (mouseenter)="hovered.set(true); dismissed.set(false)"
+  (mouseleave)="hovered.set(false)"
+  (focus)="focused.set(true); dismissed.set(false)"
+  (blur)="focused.set(false)"
+  (keydown.escape)="dismissed.set(true); $event.stopPropagation()"
+>
+  @if (image() && failedImage() !== image()) {
+    <img [src]="image()" alt="" (error)="failedImage.set(image())" />
+  } @else {
+    <span aria-hidden="true">{{ initials() }}</span>
+  }
+</span>
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="showTooltip()"
+  [cdkConnectedOverlayPositions]="positions"
+  [cdkConnectedOverlayPush]="true"
+  (overlayKeydown)="$event.key === 'Escape' && dismissed.set(true)"
+>
+  <span
+    class="assignee-tooltip"
+    role="tooltip"
+    [id]="tooltipId"
+    (mouseenter)="hovered.set(true)"
+    (mouseleave)="hovered.set(false)"
+    >{{ name() }}</span
+  >
+</ng-template>

@@ -107,6 +107,66 @@ test('identifiers normalize accents and reject invalid or duplicate values', () 
   assert.ok(record.workspaceErrors('Producto', 'producto', '', [{ slug: 'producto' }]).slug);
   assert.equal(record.workspaceErrors('Producto', 'producto', '', []).slug, '');
 });
+
+test('self-assignment reuses the account-linked member instead of the personal task preference', async () => {
+  const store = makeStore(new MemoryStorage());
+  store.auth.isDemo = false;
+  store.auth.user = () => ({ id: 'self', email: 'me@example.com', email_confirmed_at: '2026-10-19' });
+  store.data.set({ ...empty(), members: [
+    { id: 'unrelated', name: 'Otra persona', email: 'other@example.com', account_id: 'other' },
+    { id: 'my-member', name: 'Yo', email: 'old@example.com', account_id: 'self' },
+  ] });
+  store.save = async () => { throw new Error('Must not create a duplicate'); };
+  assert.equal((await store.ensureCurrentMember()).id, 'my-member');
+  assert.equal(store.canAssignMember('my-member'), true);
+});
+
+test('self-assignment reuses a matching login email and creates the current user only once when absent', async () => {
+  const store = makeStore(new MemoryStorage());
+  store.auth.isDemo = false;
+  store.auth.user = () => ({ id: 'self', email: 'me@example.com', email_confirmed_at: '2026-10-19', user_metadata: { full_name: 'Mi nombre' } });
+  store.data.set({ ...empty(), members: [{ id: 'existing', name: 'Yo', email: ' ME@example.com ' }] });
+  assert.equal((await store.ensureCurrentMember()).id, 'existing');
+  assert.equal(store.canAssignMember('existing'), true);
+  store.data.set(empty());
+  let saves = 0;
+  store.save = async (collection, entity) => {
+    saves++;
+    assert.equal(collection, 'members');
+    assert.equal(entity.name, 'Mi nombre');
+    assert.equal(entity.email, 'me@example.com');
+    store.data.update(data => ({ ...data, members: [...data.members, { ...entity, account_id: 'self' }] }));
+    return true;
+  };
+  const member = await store.ensureCurrentMember();
+  assert.equal((await store.ensureCurrentMember()).id, member.id);
+  assert.equal(saves, 1);
+});
+
+test('self-assignment requires a confirmed account and rejects failed or stale creation', async () => {
+  const store = makeStore(new MemoryStorage());
+  store.auth.isDemo = false;
+  store.data.set(empty());
+  let user = { id: 'self', email: 'me@example.com' };
+  store.auth.user = () => user;
+  store.save = async () => { throw new Error('Unconfirmed accounts cannot create a member'); };
+  assert.equal(await store.ensureCurrentMember(), undefined);
+  user = { ...user, email_confirmed_at: '2026-10-19' };
+  store.save = async () => false;
+  assert.equal(await store.ensureCurrentMember(), undefined);
+  store.save = async () => { user = { ...user, id: 'another-account' }; return true; };
+  assert.equal(await store.ensureCurrentMember(), undefined);
+});
+
+test('self-assignment works locally in the demo without requiring a remote account', async () => {
+  const store = makeStore(new MemoryStorage());
+  const selected = store.myMemberId();
+  assert.equal((await store.ensureCurrentMember()).id, selected);
+  store.data.set(empty());
+  const member = await store.ensureCurrentMember();
+  assert.equal(member.name, 'Usuario demo');
+  assert.equal(store.members().length, 1);
+});
 test('local creation preserves legacy demo and isolates workspace data across reloads', () => {
   const storage = new MemoryStorage(),
     repo = new local.LocalWorkspaces(storage);

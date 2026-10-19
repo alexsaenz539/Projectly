@@ -17,6 +17,7 @@ export interface Project {
 }
 export interface Member {
   id: string;
+  account_id?: string | null;
   name: string;
   role: string;
   email: string;

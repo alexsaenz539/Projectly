@@ -1,7 +1,7 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { AuthService } from '../auth/auth.service';
-import { Collection, Entity, Preferences, Status, Ticket, Workspace } from './models';
+import { Collection, Entity, Member, Preferences, Status, Ticket, Workspace } from './models';
 import { sampleWorkspace } from './seed';
 import { WorkspaceRecord, workspaceErrors } from './workspace-record';
 import { DEMO_WORKSPACE_ID, EMPTY_WORKSPACE, LocalWorkspaces } from './local-workspaces';
@@ -54,6 +54,42 @@ export class WorkspaceService {
   readonly myName = computed(
     () => this.member(this.myMemberId())?.name || this.auth.user()?.email || 'Mi espacio',
   );
+  canAssignMember(id: string): boolean {
+    const member = this.member(id);
+    const user = this.auth.user();
+    return this.auth.isDemo || !!member?.account_id || !!(
+      member && user?.email_confirmed_at && user.email &&
+      member.email.trim().toLowerCase() === user.email.trim().toLowerCase()
+    );
+  }
+  async ensureCurrentMember(): Promise<Member | undefined> {
+    if (this.busy() || this.spaceBusy() || !this.hasWorkspace()) return undefined;
+    const workspaceId = this.activeWorkspaceId();
+    const user = this.auth.user();
+    if (this.auth.isDemo) {
+      const current = this.member(this.myMemberId());
+      if (current) return current;
+      const member: Member = { id: crypto.randomUUID(), name: 'Usuario demo', email: 'demo@projectly.local', role: 'Miembro' };
+      if (await this.save('members', member) && workspaceId === this.activeWorkspaceId()) return this.member(member.id);
+      return undefined;
+    }
+    if (!user?.email || !user.email_confirmed_at) {
+      this.notify('Confirma el correo de tu cuenta para poder asignarte tickets.', 'warning');
+      return undefined;
+    }
+    const existing = this.members().find(member => member.account_id === user.id) ??
+      this.members().find(member => !member.account_id && member.email.trim().toLowerCase() === user.email!.trim().toLowerCase());
+    if (existing) return existing;
+    const member: Member = {
+      id: crypto.randomUUID(),
+      name: String(user.user_metadata?.['full_name'] ?? '').trim() || user.email,
+      email: user.email,
+      role: 'Miembro',
+    };
+    const saved = await this.save('members', member);
+    if (!saved || workspaceId !== this.activeWorkspaceId() || user.id !== this.auth.user()?.id) return undefined;
+    return this.member(member.id);
+  }
   private channel?: RealtimeChannel;
   private generation = 0;
   private dataVersion = 0;

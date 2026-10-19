@@ -92,6 +92,7 @@ function board() {
     '../../shared/components/page-header.component': {},
     '../../shared/components/icon.component': {},
     '../../shared/components/badge.component': {},
+    '../../shared/components/assignee-avatar/assignee-avatar.component': {},
   };
   const exports = {};
   const source = readFileSync(

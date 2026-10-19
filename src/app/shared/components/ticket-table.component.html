@@ -23,7 +23,7 @@
             <td>{{ t.target_version || 'Sin versión' }}</td>
             <td><app-badge [value]="t.status" /></td>
             <td><app-badge [value]="t.priority" /></td>
-            <td>{{ store.member(t.assignee)?.name || 'Sin asignar' }}</td>
+            <td><app-assignee-avatar [member]="store.member(t.assignee)" /></td>
             <td>{{ t.due ? (t.due + 'T12:00:00' | date: 'dd MMM yyyy') : 'Sin fecha' }}</td>
           </tr>
         }

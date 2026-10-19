@@ -27,6 +27,7 @@ function page() {
     '@angular/core/rxjs-interop': { toSignal: value => () => value },
     '../../core/services/workspace.service': { WorkspaceService },
     '../../shared/components/badge.component': {},
+    '../../shared/components/assignee-avatar/assignee-avatar.component': {},
     '../../shared/components/ticket-screenshots.component': {},
   };
   const exports = {};

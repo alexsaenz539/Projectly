@@ -8,6 +8,7 @@ import { FormControlsModule } from '../../shared/components/form-controls.module
 import { PageHeaderComponent } from '../../shared/components/page-header.component';
 import { IconComponent } from '../../shared/components/icon.component';
 import { BadgeComponent } from '../../shared/components/badge.component';
+import { AssigneeAvatarComponent } from '../../shared/components/assignee-avatar/assignee-avatar.component';
 @Component({
   selector: 'app-kanban',
   imports: [
@@ -17,6 +18,7 @@ import { BadgeComponent } from '../../shared/components/badge.component';
     PageHeaderComponent,
     IconComponent,
     BadgeComponent,
+    AssigneeAvatarComponent,
   ],
   templateUrl: './kanban.component.html',
   styleUrl: './kanban.component.css',

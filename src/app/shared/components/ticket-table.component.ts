@@ -4,9 +4,10 @@ import { WorkspaceService } from '../../core/services/workspace.service';
 import { EditorService } from '../../core/services/editor.service';
 import { Ticket } from '../../core/services/models';
 import { BadgeComponent } from './badge.component';
+import { AssigneeAvatarComponent } from './assignee-avatar/assignee-avatar.component';
 @Component({
   selector: 'app-ticket-table',
-  imports: [DatePipe, BadgeComponent],
+  imports: [DatePipe, BadgeComponent, AssigneeAvatarComponent],
   templateUrl: './ticket-table.component.html',
   styleUrl: './ticket-table.component.css',
 })

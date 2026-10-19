@@ -5,9 +5,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { BadgeComponent } from '../../shared/components/badge.component';
 import { TicketScreenshotsComponent } from '../../shared/components/ticket-screenshots.component';
+import { AssigneeAvatarComponent } from '../../shared/components/assignee-avatar/assignee-avatar.component';
 
 @Component({
-  imports: [DatePipe, RouterLink, BadgeComponent, TicketScreenshotsComponent],
+  imports: [DatePipe, RouterLink, BadgeComponent, TicketScreenshotsComponent, AssigneeAvatarComponent],
   selector: 'app-ticket-page',
   styleUrl: './ticket-page.component.css',
   templateUrl: './ticket-page.component.html',
