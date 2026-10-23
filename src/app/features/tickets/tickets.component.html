@@ -1,42 +1,87 @@
-<app-page-header
-  title="Tickets"
-  eyebrow="Trabajo diario"
-  subtitle="Busca, filtra y abre cada ticket para editar sus datos."
-  ><button
-    class="btn btn-primary"
-    (click)="editor.open('ticket', undefined, project() || undefined)"
-  >
+<app-page-header title="Tickets" eyebrow="Trabajo diario" subtitle="Busca y consulta los tickets por proyecto, temática y más criterios.">
+  <button class="btn btn-primary" (click)="editor.open('ticket', undefined, filters().project || undefined)">
     <app-icon name="plus" />Crear ticket
-  </button></app-page-header
->
-<div class="toolbar">
-  <input
-    class="field"
-    type="search"
-    placeholder="Buscar por ID o título"
-    aria-label="Buscar tickets"
-    [ngModel]="query()"
-    (ngModelChange)="query.set($event)"
-  /><select
-    class="select"
-    aria-label="Filtrar por estado"
-    [ngModel]="status()"
-    (ngModelChange)="status.set($event)"
-  >
-    <option value="">Todos los estados</option>
-    @for (s of statuses; track s) {
-      <option>{{ s }}</option>
-    }</select
-  ><select
-    class="select"
-    aria-label="Filtrar por proyecto"
-    [ngModel]="project()"
-    (ngModelChange)="project.set($event)"
-  >
-    <option value="">Todos los proyectos</option>
-    @for (p of store.projects(); track p.id) {
-      <option [value]="p.id">{{ p.name }}</option>
-    }</select
-  ><span class="count-note">{{ visible().length }} de {{ store.tickets().length }} tickets</span>
+  </button>
+</app-page-header>
+<section class="ticket-filters" aria-label="Filtros de tickets">
+  <div class="form-row">
+    <label for="ticket-search">Buscar</label>
+    <input id="ticket-search" class="field" type="search" placeholder="ID, título o temática" [ngModel]="filters().query" (ngModelChange)="setFilter('query', $event)" />
+  </div>
+  <div class="form-row">
+    <label for="filter-project">Proyecto</label>
+    <select id="filter-project" [ngModel]="filters().project" (ngModelChange)="setFilter('project', $event)">
+      <option value="">Todos los proyectos</option>
+      @for (p of store.projects(); track p.id) { <option [value]="p.id">{{ p.name }}</option> }
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="filter-topic">Temática</label>
+    <select id="filter-topic" [ngModel]="filters().topic" (ngModelChange)="setFilter('topic', $event)">
+      <option value="">Todas las temáticas</option>
+      @for (topic of store.topics(); track topic) { <option [value]="topic">{{ topic }}</option> }
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="filter-status">Estado</label>
+    <select id="filter-status" [ngModel]="filters().status" (ngModelChange)="setFilter('status', $event)">
+      <option value="">Todos los estados</option>
+      @for (s of statuses; track s) { <option>{{ s }}</option> }
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="filter-priority">Prioridad</label>
+    <select id="filter-priority" [ngModel]="filters().priority" (ngModelChange)="setFilter('priority', $event)">
+      <option value="">Todas las prioridades</option>
+      @for (priority of priorities; track priority) { <option>{{ priority }}</option> }
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="filter-assignee">Responsable</label>
+    <select id="filter-assignee" [ngModel]="filters().assignee" (ngModelChange)="setFilter('assignee', $event)">
+      <option value="">Todos los responsables</option><option value="unassigned">Sin asignar</option>
+      @for (member of store.members(); track member.id) { <option [value]="member.id">{{ member.name }}</option> }
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="filter-type">Tipo</label>
+    <select id="filter-type" [ngModel]="filters().type" (ngModelChange)="setFilter('type', $event)">
+      <option value="">Todos los tipos</option>
+      @for (type of ['Tarea', 'Bug', 'Mejora']; track type) { <option>{{ type }}</option> }
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="filter-version">Versión de entrega</label>
+    <select id="filter-version" [ngModel]="filters().version" (ngModelChange)="setFilter('version', $event)">
+      <option value="">Todas las versiones</option><option value=":none:">Sin versión</option>
+      @for (version of versions(); track version) { <option [value]="version">{{ version }}</option> }
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="filter-sprint">Sprint</label>
+    <select id="filter-sprint" [ngModel]="filters().sprint" (ngModelChange)="setFilter('sprint', $event)">
+      <option value="">Todos los sprints</option><option value="no-sprint">Sin sprint</option>
+      @for (sprint of store.sprints(); track sprint.id) { <option [value]="sprint.id">{{ sprint.name }}</option> }
+    </select>
+  </div>
+</section>
+<div class="ticket-results">
+  <span class="count-note" role="status">{{ pagination().start }}–{{ pagination().end }} de {{ visible().length }} resultados · {{ store.tickets().length }} tickets en total</span>
+  <button type="button" class="btn btn-quiet" (click)="resetFilters()">Limpiar filtros</button>
 </div>
-<section class="card card-pad"><app-ticket-table [tickets]="visible()" /></section>
+<section class="card card-pad"><app-ticket-table [tickets]="pagination().tickets" /></section>
+<nav class="ticket-pagination" aria-label="Paginación de tickets">
+  <div class="page-size">
+    <label for="ticket-page-size">Por página</label>
+    <select id="ticket-page-size" [ngModel]="pageSize()" (ngModelChange)="pageSize.set(+$event)">
+      @for (size of [10, 25, 50, 100]; track size) { <option [ngValue]="size">{{ size }}</option> }
+    </select>
+  </div>
+  <div class="page-actions">
+    <button type="button" class="btn" aria-label="Primera página" [disabled]="pagination().page === 1" (click)="page.set(1)">Primera</button>
+    <button type="button" class="btn" [disabled]="pagination().page === 1" (click)="page.set(pagination().page - 1)">Anterior</button>
+    <span class="helper" aria-live="polite">Página {{ pagination().page }} de {{ pagination().pages }}</span>
+    <button type="button" class="btn" [disabled]="pagination().page === pagination().pages" (click)="page.set(pagination().page + 1)">Siguiente</button>
+    <button type="button" class="btn" aria-label="Última página" [disabled]="pagination().page === pagination().pages" (click)="page.set(pagination().pages)">Última</button>
+  </div>
+</nav>

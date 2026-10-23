@@ -1,0 +1,23 @@
+.ticket-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.ticket-filters .form-row { min-width: 0; }
+.ticket-results, .ticket-pagination, .page-size, .page-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.ticket-results, .ticket-pagination { justify-content: space-between; }
+.ticket-results { margin-bottom: 12px; }
+.ticket-pagination { margin-top: 16px; }
+.page-size label { color: var(--text-muted); font-size: 13px; }
+.page-size select { width: 88px; }
+@media (max-width: 600px) {
+  .page-actions { width: 100%; gap: 8px; }
+  .page-actions .btn { flex: 1; }
+  .page-actions .helper { flex-basis: 100%; text-align: center; order: -1; }
+}
