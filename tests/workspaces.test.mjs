@@ -92,6 +92,7 @@ function makeStore(storage, client = null, globals = {}) {
       './seed': seed,
       './workspace-record': record,
       './local-workspaces': local,
+      './ticket-topics': compile('src/app/core/services/ticket-topics.ts'),
     },
     { localStorage: storage, ...globals },
   );
@@ -284,6 +285,52 @@ test('corrupt registry is reported and never overwritten by creation', () => {
   assert.throws(() => repo.create('Producto', 'producto', ''), /lista de espacios/);
   assert.equal(storage.getItem('projectly-workspaces-v1'), 'broken-json');
 });
+test('ticket topics persist locally, normalize labels and remain scoped to the workspace', async () => {
+  const storage = new MemoryStorage();
+  const store = makeStore(storage);
+  store.notify = () => {};
+  const first = await store.createWorkspace('Primero', 'primero', '');
+  await store.save('ticket_catalog', { id: 'topic-hotel', kind: 'topic', name: 'Hoteles' });
+  await store.save('ticket_catalog', { id: 'topic-booking', kind: 'topic', name: 'Reservas' });
+  const ticket = { id: 'topic-ticket', key: 'APP-1', title: 'Hotel', status: 'Pendiente', topics: [' Hoteles ', 'HOTELES', 'Reservas'] };
+  assert.equal(await store.save('tickets', ticket), true);
+  assert.deepEqual(Array.from(store.topics()), ['Hoteles', 'Reservas']);
+  assert.deepEqual(Array.from(makeStore(storage).tickets()[0].topics), ['Hoteles', 'Reservas']);
+  await store.createWorkspace('Segundo', 'segundo', '');
+  assert.deepEqual(Array.from(store.topics()), []);
+  await store.selectWorkspace(first.id);
+  assert.equal(await store.save('tickets', { ...ticket, topics: ['x'.repeat(61)] }), false);
+  assert.deepEqual(Array.from(store.tickets()[0].topics), ['Hoteles', 'Reservas']);
+});
+
+test('catalogs persist unused entries and reject duplicates and uncatalogued assignments', async () => {
+  const storage = new MemoryStorage();
+  const store = makeStore(storage);
+  store.notify = () => {};
+  await store.createWorkspace('Catálogos', 'catalogos', '');
+  assert.equal(await store.save('ticket_catalog', { id: 'topic', kind: 'topic', name: ' Hoteles ' }), true);
+  assert.equal(await store.save('ticket_catalog', { id: 'duplicate', kind: 'topic', name: 'hoteles' }), false);
+  assert.equal(await store.save('ticket_catalog', { id: 'version', kind: 'version', name: '2.0' }), true);
+  assert.deepEqual(Array.from(makeStore(storage).topics()), ['Hoteles']);
+  assert.deepEqual(Array.from(makeStore(storage).versions()), ['2.0']);
+  const ticket = { id: 'new', key: 'NEW-1', title: 'Ticket', status: 'Pendiente' };
+  assert.equal(await store.save('tickets', { ...ticket, topics: ['Inexistente'] }), false);
+  assert.equal(await store.save('tickets', { ...ticket, target_version: '3.0' }), false);
+  assert.equal(await store.save('tickets', { ...ticket, topics: ['Hoteles'], target_version: '2.0' }), true);
+});
+
+test('legacy local versions are added to the catalogue without losing ticket assignments', () => {
+  const storage = new MemoryStorage();
+  const legacy = empty();
+  delete legacy.ticket_catalog;
+  legacy.tickets = [{ id: 'legacy', topics: ['Hoteles'], target_version: '1.0' }];
+  storage.setItem('project-os-angular-demo-v1', JSON.stringify(legacy));
+  const store = makeStore(storage);
+  assert.deepEqual(Array.from(store.topics()), ['Hoteles']);
+  assert.deepEqual(Array.from(store.versions()), ['1.0']);
+  assert.equal(store.tickets()[0].target_version, '1.0');
+});
+
 test('store saves only in selected space, restores data and resets only the demo', async () => {
   const storage = new MemoryStorage(),
     store = makeStore(storage);

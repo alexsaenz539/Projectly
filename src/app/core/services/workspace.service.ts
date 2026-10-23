@@ -5,7 +5,8 @@ import { Collection, Entity, Member, Preferences, Status, Ticket, Workspace } fr
 import { sampleWorkspace } from './seed';
 import { WorkspaceRecord, workspaceErrors } from './workspace-record';
 import { DEMO_WORKSPACE_ID, EMPTY_WORKSPACE, LocalWorkspaces } from './local-workspaces';
-const EMPTY: Workspace = { projects: [], members: [], tickets: [], sprints: [], notifications: [] };
+import { normalizeTopics, topicKey } from './ticket-topics';
+const EMPTY: Workspace = { projects: [], members: [], tickets: [], sprints: [], notifications: [], ticket_catalog: [] };
 const PREF_KEY = 'project-os-angular-preferences-v1';
 @Injectable({ providedIn: 'root' })
 export class WorkspaceService {
@@ -42,6 +43,11 @@ export class WorkspaceService {
   readonly toastKind = signal<'success' | 'error' | 'warning' | 'info'>('info');
   readonly projects = computed(() => this.data().projects);
   readonly tickets = computed(() => this.data().tickets);
+  readonly catalog = computed(() => this.data().ticket_catalog);
+  readonly topics = computed(() => this.catalog().filter(item => item.kind === 'topic').map(item => item.name)
+    .sort((a, b) => a.localeCompare(b, 'es')));
+  readonly versions = computed(() => this.catalog().filter(item => item.kind === 'version').map(item => item.name)
+    .sort((a, b) => a.localeCompare(b, 'es', { numeric: true })));
   readonly members = computed(() => this.data().members);
   readonly sprints = computed(() => this.data().sprints);
   readonly notifications = computed(() => this.data().notifications);
@@ -516,12 +522,37 @@ export class WorkspaceService {
     try {
       if (!this.hasWorkspace()) throw new Error('Crea o selecciona un espacio de trabajo.');
       let saved: Entity = entity;
+      if (collection === 'tickets') {
+        const ticket = entity as Ticket;
+        const topics = normalizeTopics(ticket.topics ?? [], this.topics());
+        if (topics.length > 20 || topics.some(topic => [...topic].length > 60))
+          throw new Error('Usa hasta 20 temáticas de un máximo de 60 caracteres cada una.');
+        if (topics.some(topic => !this.topics().includes(topic)))
+          throw new Error('Selecciona las temáticas del catálogo del espacio.');
+        if (ticket.target_version && !this.versions().includes(ticket.target_version))
+          throw new Error('Selecciona una versión del catálogo del espacio.');
+        saved = { ...ticket, topics };
+      }
+      if (collection === 'ticket_catalog') {
+        const item = entity as Workspace['ticket_catalog'][number];
+        const name = item.name.normalize('NFC').trim().replace(/\s+/g, ' ');
+        if (!['topic', 'version'].includes(item.kind) || !name || [...name].length > 60 ||
+          (item.kind === 'topic' && name.includes(',')))
+          throw new Error('Escribe un nombre de hasta 60 caracteres sin comas para la temática.');
+        if (item.kind === 'version' && !/^[A-Za-z0-9][A-Za-z0-9.+_-]{0,39}$/.test(name))
+          throw new Error('La versión admite hasta 40 letras, números, puntos y guiones; sin espacios.');
+        if (this.catalog().some(existing => existing.id === item.id))
+          throw new Error('Las entradas del catálogo no se pueden modificar.');
+        if (this.catalog().some(existing => existing.kind === item.kind && topicKey(existing.name) === topicKey(name)))
+          throw new Error('Ese nombre ya existe en el catálogo.');
+        saved = { id: item.id, kind: item.kind, name };
+      }
       if (this.client) {
         const user = this.auth.user();
         if (!user) throw new Error('La sesión ha terminado. Inicia sesión nuevamente.');
         const { data, error } = await this.client
           .from(collection)
-          .upsert({ ...entity, user_id: user.id, workspace_id: this.activeWorkspaceId() })
+          .upsert({ ...saved, user_id: user.id, workspace_id: this.activeWorkspaceId() })
           .select()
           .single();
         if (error) throw error;

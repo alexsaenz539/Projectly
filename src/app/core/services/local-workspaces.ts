@@ -3,6 +3,7 @@ import { sampleWorkspace } from './seed';
 import { WorkspaceRecord, workspaceErrors } from './workspace-record';
 export const DEMO_WORKSPACE_ID = 'demo';
 export const EMPTY_WORKSPACE: Workspace = {
+  ticket_catalog: [],
   projects: [],
   members: [],
   tickets: [],
@@ -86,11 +87,16 @@ export class LocalWorkspaces {
     }
     if (
       !data ||
-      !Object.keys(EMPTY_WORKSPACE).every((key) => Array.isArray(data[key as keyof Workspace]))
+      !Object.keys(EMPTY_WORKSPACE).filter(key => key !== 'ticket_catalog').every((key) => Array.isArray(data[key as keyof Workspace])) ||
+      (data?.ticket_catalog !== undefined && !Array.isArray(data.ticket_catalog))
     )
       throw new Error('Los datos guardados del espacio no son válidos.');
     return {
       ...data,
+      ticket_catalog: data.ticket_catalog ?? [
+        ...[...new Set(data.tickets.flatMap(ticket => ticket.topics ?? []))].map(name => ({ id: crypto.randomUUID(), kind: 'topic' as const, name })),
+        ...[...new Set(data.tickets.map(ticket => ticket.target_version).filter((name): name is string => !!name))].map(name => ({ id: crypto.randomUUID(), kind: 'version' as const, name })),
+      ],
       notifications: data.notifications.map((notice) =>
         notice.title === 'Bienvenido a Project OS'
           ? { ...notice, title: 'Bienvenido a Projectly' }

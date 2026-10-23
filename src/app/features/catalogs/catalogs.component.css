@@ -1,0 +1,6 @@
+.catalogs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 20px; }
+.catalog-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.catalog-heading h2 { font-size: 18px; }
+.catalog-list { list-style: none; padding: 0; margin: 20px 0 0; }
+.catalog-list li { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-subtle); }
+.catalog-list strong { overflow-wrap: anywhere; }

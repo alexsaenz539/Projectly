@@ -44,6 +44,7 @@ export interface Ticket {
   due: string | null;
   sprint_id: string | null;
   target_version?: string | null;
+  topics?: string[];
 }
 export interface Notice {
   id: string;
@@ -59,6 +60,7 @@ export interface Preferences {
   myMemberId: string;
 }
 export interface Workspace {
+  ticket_catalog: TicketCatalogItem[];
   projects: Project[];
   members: Member[];
   sprints: Sprint[];
@@ -66,7 +68,12 @@ export interface Workspace {
   notifications: Notice[];
 }
 export type Collection = keyof Workspace;
-export type Entity = Project | Member | Sprint | Ticket | Notice;
+export interface TicketCatalogItem {
+  id: string;
+  kind: 'topic' | 'version';
+  name: string;
+}
+export type Entity = Project | Member | Sprint | Ticket | Notice | TicketCatalogItem;
 export function isoDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }

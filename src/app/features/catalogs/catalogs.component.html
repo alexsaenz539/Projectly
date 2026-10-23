@@ -1,0 +1,19 @@
+<app-page-header title="Catálogos" eyebrow="Administración" subtitle="Temáticas y versiones compartidas por los tickets de este espacio." />
+<div class="catalogs-grid">
+  @for (section of sections; track section.kind) {
+    <section class="card card-pad" [attr.aria-labelledby]="'catalog-' + section.kind">
+      <header class="catalog-heading">
+        <h2 [id]="'catalog-' + section.kind">{{ section.title }}</h2>
+        <button type="button" class="btn btn-primary" [disabled]="store.loading() || store.busy()" (click)="editor.open(section.kind)">{{ section.kind === 'topic' ? 'Nueva temática' : 'Nueva versión' }}</button>
+      </header>
+      <p class="helper">{{ section.description }}</p>
+      <ul class="catalog-list">
+        @for (name of (section.kind === 'topic' ? store.topics() : store.versions()); track name) {
+          <li><strong>{{ name }}</strong><a class="text-link" routerLink="/tickets" [queryParams]="{ workspace: store.activeWorkspaceId(), topic: section.kind === 'topic' ? name : null, version: section.kind === 'version' ? name : null }">Ver tickets ({{ ticketCount(section.kind, name) }})</a></li>
+        } @empty {
+          <li class="helper">Todavía no hay {{ section.kind === 'topic' ? 'temáticas' : 'versiones' }} en este catálogo.</li>
+        }
+      </ul>
+    </section>
+  }
+</div>

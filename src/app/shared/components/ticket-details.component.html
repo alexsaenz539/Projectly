@@ -1,6 +1,6 @@
 <section class="dialog ticket-details" aria-labelledby="ticket-details-title">
   <header class="dialog-head">
-    <div><h2 id="ticket-details-title">{{ ticket.key }} - {{ ticket.title }}</h2></div>
+    <div><h2 id="ticket-details-title">{{ ticket.topics?.length ? '(' + ticket.topics!.join(', ') + ') ' : '' }}{{ ticket.key }} - {{ ticket.title }}</h2></div>
     <button type="button" class="icon-btn" aria-label="Cerrar detalle" (click)="ref.close()"><app-icon name="x" /></button>
   </header>
   <div class="ticket-detail-badges"><app-badge [value]="ticket.status" /><app-badge [value]="ticket.priority" /></div>
@@ -12,6 +12,7 @@
     <div><dt>Proyecto</dt><dd>{{ store.project(ticket.project_id)?.name || 'Proyecto no disponible' }}</dd></div>
     <div><dt>Responsable</dt><dd><app-assignee-avatar [member]="store.member(ticket.assignee)" /></dd></div>
     <div><dt>Tipo</dt><dd>{{ ticket.type }}</dd></div>
+    <div><dt>Temáticas</dt><dd>{{ ticket.topics?.join(', ') || 'Sin temáticas' }}</dd></div>
     <div><dt>Versión de entrega</dt><dd>{{ ticket.target_version || 'Sin versión' }}</dd></div>
     <div><dt>Vencimiento</dt><dd>{{ ticket.due ? (ticket.due | date: 'dd/MM/yyyy') : 'Sin fecha' }}</dd></div>
     <div class="ticket-detail-sprint"><dt>Sprint</dt><dd>{{ sprintName }}</dd></div>

@@ -17,7 +17,8 @@
           <tr class="ticket-row" (click)="editor.open('ticket', t)">
             <td class="title-cell">
               <button type="button" class="text-link" [attr.aria-label]="'Abrir ticket ' + t.key + ': ' + t.title" (click)="$event.stopPropagation(); editor.open('ticket', t)">{{ t.title }}</button
-              ><span class="subline mono">{{ t.key }}</span>
+               ><span class="subline mono">{{ t.key }}</span>
+               @if (t.topics?.length) { <span class="subline">Temáticas: {{ t.topics.join(', ') }}</span> }
             </td>
             <td>{{ store.project(t.project_id)?.name }}</td>
             <td>{{ t.target_version || 'Sin versión' }}</td>

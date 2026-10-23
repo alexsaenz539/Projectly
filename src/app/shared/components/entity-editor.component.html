@@ -1,6 +1,6 @@
 <section class="dialog" aria-labelledby="editor-title">
   <div class="dialog-head">
-    <h2 id="editor-title">{{ existing ? 'Editar' : 'Nuevo' }} {{ labels[data.kind] }}</h2>
+    <h2 id="editor-title">{{ existing ? 'Editar' : (data.kind === 'topic' || data.kind === 'version' ? 'Nueva' : 'Nuevo') }} {{ labels[data.kind] }}</h2>
     <button
       class="icon-btn"
       type="button"
@@ -101,9 +101,32 @@
       }
       @if (data.kind === 'ticket') {
         <div class="form-row">
-          <label for="target-version">Versión de entrega</label>
-          <input id="target-version" name="target_version" maxlength="40" placeholder="Ej. 0.1.6 o 1.0.0-beta.1" [(ngModel)]="model['target_version']" aria-describedby="target-version-help" />
-          <p id="target-version-help" class="helper">Versión del producto en la que se entregará. Déjalo vacío si aún no está definida.</p>
+          <div class="form-label-actions">
+            <span>Temáticas</span>
+            <button type="button" class="text-link" [disabled]="store.busy()" (click)="createRelated('topic')"><app-icon name="plus" [size]="12" />Nueva temática</button>
+          </div>
+          <p class="helper">Selecciona hasta 20 temáticas del catálogo del espacio.</p>
+          @if (store.topics().length) {
+            <fieldset class="topic-options">
+              <legend class="helper">Temáticas del ticket</legend>
+              @for (topic of store.topics(); track topic) {
+                <label class="topic-option"><input type="checkbox" [ngModel]="hasTopic(topic)" [ngModelOptions]="{standalone: true}" (ngModelChange)="toggleTopic(topic, $event)" /> {{ topic }}</label>
+              }
+            </fieldset>
+          } @else {
+            <p class="helper">No hay temáticas. Crea la primera para relacionar tus tickets.</p>
+          }
+        </div>
+        <div class="form-row">
+          <div class="form-label-actions">
+            <label for="target-version">Versión de entrega</label>
+            <button type="button" class="text-link" [disabled]="store.busy()" (click)="createRelated('version')"><app-icon name="plus" [size]="12" />Nueva versión</button>
+          </div>
+          <select id="target-version" name="target_version" [(ngModel)]="model['target_version']" aria-describedby="target-version-help">
+            <option value="">Sin versión</option>
+            @for (version of store.versions(); track version) { <option [value]="version">{{ version }}</option> }
+          </select>
+          <p id="target-version-help" class="helper">Selecciona la versión del catálogo en la que se entregará el ticket.</p>
         </div>
         <div class="grid grid-cols-2">
           <div class="form-row">

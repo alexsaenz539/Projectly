@@ -77,6 +77,7 @@ test('ticket headings show the key and title separated by a hyphen without the r
   for (const path of ['features/tickets/ticket-page.component.html', 'shared/components/ticket-details.component.html']) {
     const template = read(path);
     assert.match(template, /{{ ticket.key }} - {{ ticket.title }}/);
+    assert.match(template, /ticket\.topics\?\.length \? '\(' \+ ticket\.topics!\.join\(', '\) \+ '\) ' : ''/);
     assert.doesNotMatch(template, /Solo lectura|·/);
   }
 });

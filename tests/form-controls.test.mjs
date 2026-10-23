@@ -281,6 +281,7 @@ function makeEditor(data = { kind: 'ticket' }) {
     projects: () => projects,
     sprints: () => [],
     tickets: () => [],
+    topics: () => [],
     activeWorkspaceId: () => 'space-1',
     busy: () => false,
     canAssignMember: () => true,
@@ -323,6 +324,7 @@ function makeEditor(data = { kind: 'ticket' }) {
     './assignee-avatar/assignee-avatar.component': {},
     './toast-feedback.directive': {},
     '../../core/services/ticket-screenshots.service': {},
+    '../../core/services/ticket-topics': load('../../core/services/ticket-topics.ts'),
   });
   return {
     editor: new EntityEditorComponent(),
@@ -331,6 +333,17 @@ function makeEditor(data = { kind: 'ticket' }) {
     related: (entity) => relatedClosed(entity),
   };
 }
+
+test('ticket topics can be reused, removed and saved without duplicates', async () => {
+  const { editor, saved } = makeEditor();
+  editor.model['title'] = 'Reserva de hotel';
+  editor.topicsText = ' Hoteles, hoteles, Reservas ';
+  assert.equal(editor.hasTopic('HOTELES'), true);
+  editor.toggleTopic('Reservas', false);
+  editor.toggleTopic('Pagos', true);
+  await editor.save();
+  assert.deepEqual(Array.from(saved[0].entity.topics), ['Hoteles', 'Pagos']);
+});
 
 test('new tickets honor their project context and save the assigned responsible', async () => {
   const { editor, saved, closed } = makeEditor({ kind: 'ticket', projectId: 'project-1' });
@@ -394,6 +407,18 @@ test('creating related projects and members retains the ticket draft and selects
     'new-member',
     'cancelling must not clear the current responsible',
   );
+});
+
+test('creating catalog entries from the ticket selects them and preserves the draft', () => {
+  const { editor, related } = makeEditor();
+  editor.model['title'] = 'Borrador';
+  editor.createRelated('topic');
+  related({ id: 'topic-hotel', kind: 'topic', name: 'Hoteles' });
+  assert.equal(editor.hasTopic('Hoteles'), true);
+  editor.createRelated('version');
+  related({ id: 'version-2', kind: 'version', name: '2.0' });
+  assert.equal(editor.model['target_version'], '2.0');
+  assert.equal(editor.model['title'], 'Borrador');
 });
 
 test('ticket delivery version is saved, trimmed, cleared and validated', async () => {

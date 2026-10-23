@@ -106,6 +106,11 @@ export const routes: Routes = [
           import('./features/profile/profile.component').then((m) => m.ProfileComponent),
       },
       {
+        path: 'catalogs',
+        title: 'Catálogos · Projectly',
+        loadComponent: () => import('./features/catalogs/catalogs.component').then(m => m.CatalogsComponent),
+      },
+      {
         path: 'settings',
         title: 'Configuración · Projectly',
         loadComponent: () =>

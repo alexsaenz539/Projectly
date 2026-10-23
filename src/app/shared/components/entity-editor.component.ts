@@ -11,6 +11,7 @@ import {
   Ticket,
   STATUSES,
   PRIORITIES,
+  TicketCatalogItem,
   day,
 } from '../../core/services/models';
 import { IconComponent } from './icon.component';
@@ -18,8 +19,9 @@ import { FormControlsModule } from './form-controls.module';
 import { TicketScreenshotsComponent } from './ticket-screenshots.component';
 import { TicketScreenshotsService } from '../../core/services/ticket-screenshots.service';
 import { ToastFeedbackDirective } from './toast-feedback.directive';
+import { normalizeTopics, topicKey } from '../../core/services/ticket-topics';
 export interface EditorData {
-  kind: 'ticket' | 'project' | 'sprint' | 'member';
+  kind: 'ticket' | 'project' | 'sprint' | 'member' | 'topic' | 'version';
   entity?: Entity;
   projectId?: string;
 }
@@ -27,6 +29,7 @@ export interface EditorData {
   selector: 'app-entity-editor',
   imports: [FormsModule, IconComponent, FormControlsModule, TicketScreenshotsComponent, ToastFeedbackDirective],
   templateUrl: './entity-editor.component.html',
+  styleUrl: './entity-editor.component.css',
 })
 export class EntityEditorComponent {
   readonly store = inject(WorkspaceService);
@@ -43,9 +46,18 @@ export class EntityEditorComponent {
   readonly statuses = STATUSES;
   readonly priorities = PRIORITIES;
   readonly existing = Boolean(this.data.entity);
-  readonly labels = { ticket: 'ticket', project: 'proyecto', sprint: 'sprint', member: 'miembro' };
+  readonly labels = { ticket: 'ticket', project: 'proyecto', sprint: 'sprint', member: 'miembro', topic: 'temática', version: 'versión' };
   error = '';
   confirmDelete = false;
+  topicsText = ((this.data.entity as Ticket | undefined)?.topics ?? []).join(', ');
+  hasTopic(topic: string): boolean {
+    return normalizeTopics(this.topicsText.split(',')).some(value => topicKey(value) === topicKey(topic));
+  }
+  toggleTopic(topic: string, selected: boolean): void {
+    const topics = normalizeTopics(this.topicsText.split(','));
+    this.topicsText = (selected ? normalizeTopics([...topics, topic]) :
+      topics.filter(value => topicKey(value) !== topicKey(topic))).join(', ');
+  }
   model: Record<string, string> = {
     name: '',
     title: '',
@@ -72,7 +84,7 @@ export class EntityEditorComponent {
     email: '',
     role: 'Miembro',
     ...Object.fromEntries(
-      Object.entries(this.data.entity ?? {}).map(([key, value]) => [key, value ?? '']),
+      Object.entries(this.data.entity ?? {}).filter(([key]) => key !== 'topics').map(([key, value]) => [key, value ?? '']),
     ),
   };
   get availableSprints() {
@@ -100,16 +112,16 @@ export class EntityEditorComponent {
     if (!this.availableSprints.some((s) => s.id === this.model['sprint_id']))
       this.model['sprint_id'] = '';
   }
-  createRelated(kind: 'project' | 'member'): void {
+  createRelated(kind: 'project' | 'member' | 'topic' | 'version'): void {
     const workspaceId = this.store.activeWorkspaceId();
     this.dialog
-      .open<Project | Member>(EntityEditorComponent, {
+      .open<Project | Member | TicketCatalogItem>(EntityEditorComponent, {
         data: { kind } satisfies EditorData,
         width: '510px',
         maxWidth: 'calc(100vw - 32px)',
         autoFocus: 'input',
         restoreFocus: true,
-        ariaLabel: kind === 'project' ? 'Crear proyecto para el ticket' : 'Añadir responsable',
+        ariaLabel: 'Crear ' + this.labels[kind],
       })
       .closed.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((entity) => {
@@ -117,7 +129,9 @@ export class EntityEditorComponent {
         if (kind === 'project') {
           this.model['project_id'] = entity.id;
           this.projectChanged();
-        } else this.model['assignee'] = entity.id;
+        } else if (kind === 'member') this.model['assignee'] = entity.id;
+        else if (kind === 'topic') this.toggleTopic((entity as TicketCatalogItem).name, true);
+        else this.model['target_version'] = (entity as TicketCatalogItem).name;
       });
   }
   async save() {
@@ -174,6 +188,7 @@ export class EntityEditorComponent {
         due: m['due'] || null,
         sprint_id: m['sprint_id'] || null,
         target_version: targetVersion || null,
+        topics: normalizeTopics(this.topicsText.split(','), this.store.topics()),
       };
       this.saving.set(true);
       const disableClose = this.ref.disableClose;
@@ -239,6 +254,10 @@ export class EntityEditorComponent {
         status: m['status'] as Sprint['status'],
       };
       success = await this.store.save('sprints', sprint);
+    } else if (this.data.kind === 'topic' || this.data.kind === 'version') {
+      const item: TicketCatalogItem = { id, kind: this.data.kind, name: m['name'] };
+      success = await this.store.save('ticket_catalog', item);
+      savedEntity = this.store.catalog().find(entry => entry.id === id);
     } else {
       if (!m['name'].trim() || !m['email'].trim()) {
         this.error = 'Escribe el nombre y el correo.';

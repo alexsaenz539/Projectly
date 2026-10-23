@@ -1,0 +1,13 @@
+.topic-options {
+  display: grid;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  min-width: 0;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 11px;
+}
+.topic-option { display: flex; align-items: center; gap: 8px; overflow-wrap: anywhere; }
+.topic-option input[type='checkbox'] { width: 16px; height: 16px; min-height: 16px; flex: 0 0 16px; padding: 0; }

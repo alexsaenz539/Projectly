@@ -41,6 +41,7 @@ export class WorkspaceLayoutComponent {
     { path: '/sprints', name: 'Sprints', icon: 'clock', group: 'Gestión' },
     { path: '/calendar', name: 'Calendario', icon: 'calendar', group: 'Gestión' },
     { path: '/team', name: 'Equipo', icon: 'users', group: 'Administración' },
+    { path: '/catalogs', name: 'Catálogos', icon: 'folder', group: 'Administración' },
     { path: '/reports', name: 'Reportes', icon: 'chart-no-axes-combined', group: 'Administración' },
     { path: '/notifications', name: 'Notificaciones', icon: 'bell', group: 'Administración' },
     { path: '/settings', name: 'Configuración', icon: 'settings', group: 'Administración' },

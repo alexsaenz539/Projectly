@@ -2,6 +2,7 @@ import { Workspace, day } from './models';
 export function sampleWorkspace(): Workspace {
   const [p1, p2, p3, m1, m2, m3, s1] = Array.from({ length: 7 }, () => crypto.randomUUID());
   return {
+    ticket_catalog: [],
     projects: [
       {
         id: p1,
