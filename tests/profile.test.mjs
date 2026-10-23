@@ -89,6 +89,8 @@ function makeProfile({
     },
   };
   class AuthService {}
+  class StorageUsageService {}
+  let usageRefreshes = 0;
   const { ProfileService } = load(
     'src/app/core/services/profile.service.ts',
     {
@@ -98,12 +100,13 @@ function makeProfile({
         signal,
         effect: (fn) => effects.push(fn),
         untracked: (fn) => fn(),
-        inject: () => auth,
+        inject: token => token === StorageUsageService ? { refresh: async () => { usageRefreshes++; } } : auth,
       },
       '../auth/auth.service': { AuthService },
       './profile-model': model,
       './profile-photo': { photoDataUrl: async () => 'data:image/webp;base64,dGVzdA==' },
       './screenshot-validation': validation,
+      './storage-usage.service': { StorageUsageService },
     },
     {
       localStorage: {
@@ -115,12 +118,23 @@ function makeProfile({
       },
     },
   );
-  return { service: new ProfileService(), auth, operations, entries, bucket, effects };
+  return { service: new ProfileService(), auth, operations, entries, bucket, effects, usageRefreshes: () => usageRefreshes };
 }
 const photo = () =>
   new File([new Uint8Array([82, 73, 70, 70, 0, 0, 0, 0, 87, 69, 66, 80])], 'photo.webp', {
     type: 'image/webp',
   });
+
+test('profile upload, replacement and removal refresh storage after completing the operation', async () => {
+  const test = makeProfile({ metadata: { profile_avatar: 'custom', profile_photo_path: 'user-a/old.webp' } });
+  await test.service.save(draft('custom'), photo());
+  assert.equal(test.usageRefreshes(), 1);
+  await test.service.save(draft(''), null);
+  assert.equal(test.usageRefreshes(), 2);
+  const demo = makeProfile({ demo: true });
+  await demo.service.save(draft('custom'), photo());
+  assert.equal(demo.usageRefreshes(), 0);
+});
 
 test('profile validates names, biography and trusted preset identifiers', () => {
   assert.equal(model.profileErrors(draft()), '');

@@ -3,6 +3,7 @@ import { AuthService } from '../auth/auth.service';
 import { ProfileDraft, presetAvatar, profileErrors } from './profile-model';
 import { photoDataUrl } from './profile-photo';
 import { validateScreenshot } from './screenshot-validation';
+import { StorageUsageService } from './storage-usage.service';
 
 const LOCAL_KEY = 'projectly-demo-profile-v1';
 const BUCKET = 'profile-avatars';
@@ -13,6 +14,7 @@ interface DemoProfile extends ProfileDraft {
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
   readonly auth = inject(AuthService);
+  private readonly storageUsage = inject(StorageUsageService);
   private readonly demo = signal<DemoProfile>(this.loadDemo());
   private readonly customUrl = signal('');
   readonly imageError = signal('');
@@ -190,6 +192,7 @@ export class ProfileService {
       }
       throw error;
     } finally {
+      if (!this.auth.isDemo && (uploaded || committed)) void this.storageUsage.refresh();
       this.busy.set(false);
     }
   }

@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { SupabaseService } from './supabase.service';
 import { screenshotFilename, validateScreenshot } from './screenshot-validation';
+import { StorageUsageService } from './storage-usage.service';
 
 export interface TicketScreenshot {
   path: string;
@@ -21,6 +22,7 @@ const BUCKET = 'ticket-screenshots';
 export class TicketScreenshotsService {
   private readonly auth = inject(AuthService);
   private readonly supabase = inject(SupabaseService);
+  private readonly storageUsage = inject(StorageUsageService);
 
   private context(workspaceId: string, ticketId?: string) {
     if (
@@ -131,6 +133,7 @@ export class TicketScreenshotsService {
         'No se pudo subir la captura. Verifica la conexión y la migración del bucket.',
       );
     this.assertUser(context.userId);
+    void this.storageUsage.refresh();
     return { path, name, url: URL.createObjectURL(file) };
   }
   async remove(workspaceId: string, ticketId: string, path: string): Promise<void> {
@@ -142,6 +145,7 @@ export class TicketScreenshotsService {
     else {
       const { error } = await this.supabase.client!.storage.from(BUCKET).remove([path]);
       if (error) throw new Error('No se pudo eliminar la captura. Vuelve a intentar.');
+      void this.storageUsage.refresh();
       this.assertUser(context.userId);
     }
   }
@@ -178,6 +182,7 @@ export class TicketScreenshotsService {
       this.assertUser(context.userId);
       const { error } = await bucket.remove(paths.slice(index, index + 100));
       if (error) throw error;
+      void this.storageUsage.refresh();
     }
   }
 }

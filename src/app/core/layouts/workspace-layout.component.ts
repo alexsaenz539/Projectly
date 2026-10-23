@@ -10,6 +10,7 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo.component
 import { WorkspaceSwitcherComponent } from '../../shared/components/workspace-switcher.component';
 import { ProfileService } from '../services/profile.service';
 import { ToastFeedbackDirective } from '../../shared/components/toast-feedback.directive';
+import { StorageUsageService } from '../services/storage-usage.service';
 @Component({
   selector: 'app-workspace-layout',
   imports: [
@@ -23,11 +24,13 @@ import { ToastFeedbackDirective } from '../../shared/components/toast-feedback.d
     ToastFeedbackDirective,
   ],
   templateUrl: './workspace-layout.component.html',
+  styleUrl: './workspace-layout.component.css',
 })
 export class WorkspaceLayoutComponent {
   readonly store = inject(WorkspaceService);
   readonly profile = inject(ProfileService);
   readonly editor = inject(EditorService);
+  readonly storageUsage = inject(StorageUsageService);
   private readonly dialog = inject(Dialog);
   private readonly router = inject(Router);
   readonly groups = ['Principal', 'Gestión', 'Administración'];

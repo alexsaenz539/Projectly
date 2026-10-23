@@ -44,6 +44,8 @@ const png = () =>
 function service(bucket, user = { id: 'account-a' }) {
   class AuthService {}
   class SupabaseService {}
+  class StorageUsageService {}
+  let usageRefreshes = 0;
   const auth = { isDemo: false, user: () => user };
   const { TicketScreenshotsService } = load('ticket-screenshots.service.ts', {
     '@angular/core': {
@@ -51,6 +53,7 @@ function service(bucket, user = { id: 'account-a' }) {
       inject: (token) =>
         token === AuthService
           ? auth
+          : token === StorageUsageService ? { refresh: async () => { usageRefreshes++; } }
           : {
               client: {
                 storage: {
@@ -65,9 +68,19 @@ function service(bucket, user = { id: 'account-a' }) {
     '../auth/auth.service': { AuthService },
     './supabase.service': { SupabaseService },
     './screenshot-validation': validation,
+    './storage-usage.service': { StorageUsageService },
   });
-  return { service: new TicketScreenshotsService(), auth };
+  return { service: new TicketScreenshotsService(), auth, usageRefreshes: () => usageRefreshes };
 }
+
+test('successful screenshot uploads and deletions refresh storage without estimating bytes locally', async () => {
+  const test = service({ upload: async () => ({ error: null }), remove: async () => ({ error: null }) });
+  const uploaded = await test.service.upload('workspace', 'ticket', png());
+  assert.equal(test.usageRefreshes(), 1);
+  await test.service.remove('workspace', 'ticket', uploaded.path);
+  assert.equal(test.usageRefreshes(), 2);
+  URL.revokeObjectURL(uploaded.url);
+});
 
 test('screenshots reject unsupported, empty, oversize and disguised files', async () => {
   await validation.validateScreenshot(png());

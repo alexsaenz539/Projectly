@@ -76,6 +76,30 @@
               : 'Espacio personal · Tus datos se sincronizan con tu cuenta.'
           }}
         </p>
+        @if (!store.auth.isDemo) {
+          <section class="storage-summary" aria-labelledby="storage-summary-title">
+            <div class="storage-summary-heading">
+              <h2 id="storage-summary-title">Almacenamiento</h2>
+              <span>Plan Free</span>
+            </div>
+            @if (storageUsage.usage(); as usage) {
+              @if (usage.complete) {
+                <strong class="storage-summary-remaining">≈ {{ storageUsage.remainingLabel() }} disponibles</strong>
+                <meter class="storage-summary-meter" min="0" [max]="storageUsage.limit" [value]="storageUsage.meterValue()" [attr.aria-label]="'Archivos del proyecto: ' + storageUsage.usedLabel() + ' usados de 1 GB'"></meter>
+              } @else {
+                <strong class="storage-summary-remaining">Disponible: sin datos completos</strong>
+              }
+              <p>{{ usage.complete ? '' : 'Al menos ' }}{{ storageUsage.usedLabel() }} usados de 1 GB</p>
+              <p class="storage-summary-note">Archivos de este proyecto. Cuota Free compartida; otros proyectos no incluidos.</p>
+            } @else {
+              <p role="status">{{ storageUsage.loading() ? 'Consultando almacenamiento…' : 'Almacenamiento no disponible' }}</p>
+            }
+            @if (storageUsage.error()) {
+              <p class="storage-summary-note" role="status">{{ storageUsage.error() }}</p>
+              <button type="button" class="text-link" [disabled]="storageUsage.loading()" (click)="storageUsage.refresh()">Reintentar consulta</button>
+            }
+          </section>
+        }
         <button class="btn btn-quiet mt-3" (click)="logout()">Cerrar sesión</button>
       </div>
     </aside>
